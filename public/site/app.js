@@ -6,7 +6,21 @@
    ============================================================ */
 
 (function () {
-  const data = window.ETERNIS_DATA;
+  // Merge any admin-saved overrides from localStorage on top of data.js defaults.
+  let data = window.ETERNIS_DATA;
+  try {
+    const saved = localStorage.getItem("eternis_data");
+    if (saved) data = JSON.parse(saved);
+  } catch (e) { /* ignore */ }
+  window.ETERNIS_CURRENT = data;
+
+  // Open WhatsApp / social links reliably even when embedded in an iframe.
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest('a[target="_blank"], a.wa-btn');
+    if (!a || !a.href) return;
+    e.preventDefault();
+    window.open(a.href, "_blank", "noopener,noreferrer");
+  });
 
   /* ---------- Render watch grid ---------- */
   const grid = document.getElementById("watch-grid");
