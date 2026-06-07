@@ -6,11 +6,27 @@
    ============================================================ */
 
 (function () {
-  // Merge any admin-saved overrides from localStorage on top of data.js defaults.
+  // Customers always see the PUBLISHED version. Admin can append
+  // ?preview=draft to view unpublished draft changes locally.
+  // Legacy key "eternis_data" is migrated to published on first load.
   let data = window.ETERNIS_DATA;
   try {
-    const saved = localStorage.getItem("eternis_data");
+    const params = new URLSearchParams(location.search);
+    const wantDraft = params.get("preview") === "draft";
+    const legacy = localStorage.getItem("eternis_data");
+    if (legacy && !localStorage.getItem("eternis_data_published")) {
+      localStorage.setItem("eternis_data_published", legacy);
+      localStorage.removeItem("eternis_data");
+    }
+    const key = wantDraft ? "eternis_data_draft" : "eternis_data_published";
+    const saved = localStorage.getItem(key) || localStorage.getItem("eternis_data_published");
     if (saved) data = JSON.parse(saved);
+    if (wantDraft) {
+      const banner = document.createElement("div");
+      banner.textContent = "DRAFT PREVIEW · NOT VISIBLE TO CUSTOMERS";
+      banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#5a0e1f;color:#f6f1e8;text-align:center;padding:8px;font:600 11px/1 Inter,sans-serif;letter-spacing:.25em;";
+      document.addEventListener("DOMContentLoaded", () => document.body.appendChild(banner));
+    }
   } catch (e) { /* ignore */ }
   window.ETERNIS_CURRENT = data;
 

@@ -62,10 +62,12 @@
   <header>
     <h1>ETERNIS · ADMIN</h1>
     <div class="actions">
-      <button class="btn ghost" id="preview">View Site</button>
+      <button class="btn ghost" id="view-live">View Live Site</button>
+      <button class="btn ghost" id="preview">Preview Draft</button>
       <button class="btn ghost" id="export">Export data.js</button>
-      <button class="btn ghost" id="reset">Reset</button>
-      <button class="btn" id="save">Save Changes</button>
+      <button class="btn ghost" id="reset">Discard Draft</button>
+      <button class="btn ghost" id="save">Save Draft</button>
+      <button class="btn" id="publish">Publish Live</button>
     </div>
   </header>
 
@@ -103,11 +105,13 @@
     </div>
 
     <div class="card">
-      <h2>How saving works</h2>
+      <h2>Draft & Publish</h2>
+      <p class="hint" id="status-line" style="margin-bottom:10px"></p>
       <p class="hint">
-        Changes are saved to this browser (localStorage) and shown immediately on the site.
-        Click <strong>Export data.js</strong> to download an updated <code>data.js</code> file
-        you can replace in your project, or copy into Wix CMS as the source for your Watches collection.
+        Edits are kept as a <strong>Draft</strong> in this browser. Customers continue to see the
+        last <strong>Published</strong> version. Use <strong>Preview Draft</strong> to review changes,
+        then click <strong>Publish Live</strong> when you're ready to make them visible to everyone.
+        Use <strong>Export data.js</strong> to download the published version for Wix CMS or backup.
       </p>
     </div>
   </div>
@@ -117,15 +121,48 @@
   <script src="./data.js"></script>
   <script>
   (function(){
-    const STORAGE = "eternis_data";
+    const DRAFT = "eternis_data_draft";
+    const PUBLISHED = "eternis_data_published";
+    const LEGACY = "eternis_data";
+
+    // One-time migration from legacy single-state key.
+    try {
+      const legacy = localStorage.getItem(LEGACY);
+      if (legacy && !localStorage.getItem(PUBLISHED)) {
+        localStorage.setItem(PUBLISHED, legacy);
+      }
+      if (legacy) localStorage.removeItem(LEGACY);
+    } catch(e){}
+
     let state = loadState();
+    let lastSavedSnapshot = JSON.stringify(state);
 
     function loadState(){
       try{
-        const saved = localStorage.getItem(STORAGE);
-        if(saved) return JSON.parse(saved);
+        const draft = localStorage.getItem(DRAFT);
+        if(draft) return JSON.parse(draft);
+        const pub = localStorage.getItem(PUBLISHED);
+        if(pub) return JSON.parse(pub);
       }catch(e){}
       return JSON.parse(JSON.stringify(window.ETERNIS_DATA));
+    }
+
+    function updateStatus(){
+      const el = document.getElementById("status-line");
+      if (!el) return;
+      const hasDraft = !!localStorage.getItem(DRAFT);
+      const hasPub = !!localStorage.getItem(PUBLISHED);
+      const dirty = JSON.stringify(currentState()) !== lastSavedSnapshot;
+      let bits = [];
+      bits.push(hasPub ? "● Live version published" : "● No version published yet (showing defaults)");
+      if (hasDraft) bits.push("● Draft saved — not yet live");
+      if (dirty) bits.push("● Unsaved changes in this session");
+      el.innerHTML = bits.map(b=>`<span style="display:inline-block;margin-right:18px">${b}</span>`).join("");
+    }
+
+    function currentState(){
+      readContact();
+      return state;
     }
 
     function toast(msg){
@@ -323,20 +360,44 @@
 
     document.getElementById("save").addEventListener("click",()=>{
       readContact();
-      localStorage.setItem(STORAGE, JSON.stringify(state));
-      toast("Saved · refresh the site to see changes");
+      localStorage.setItem(DRAFT, JSON.stringify(state));
+      lastSavedSnapshot = JSON.stringify(state);
+      updateStatus();
+      toast("Draft saved · customers still see published version");
+    });
+
+    document.getElementById("publish").addEventListener("click",()=>{
+      readContact();
+      if(!confirm("Publish these changes live? Customers will see the updated site immediately.")) return;
+      const payload = JSON.stringify(state);
+      localStorage.setItem(PUBLISHED, payload);
+      localStorage.setItem(DRAFT, payload);
+      lastSavedSnapshot = payload;
+      updateStatus();
+      toast("Published live");
     });
 
     document.getElementById("reset").addEventListener("click",()=>{
-      if(!confirm("Discard all changes and reload defaults from data.js?")) return;
-      localStorage.removeItem(STORAGE);
+      if(!confirm("Discard the current draft and revert to the published version?")) return;
+      localStorage.removeItem(DRAFT);
       state = loadState();
+      lastSavedSnapshot = JSON.stringify(state);
       bindContact(); renderWatches();
-      toast("Reset to defaults");
+      updateStatus();
+      toast("Draft discarded");
     });
 
     document.getElementById("preview").addEventListener("click",()=>{
-      window.open("./index.html","_blank");
+      readContact();
+      // Persist current edits as draft so preview reflects them.
+      localStorage.setItem(DRAFT, JSON.stringify(state));
+      lastSavedSnapshot = JSON.stringify(state);
+      updateStatus();
+      window.open("./index.html?preview=draft","_blank","noopener,noreferrer");
+    });
+
+    document.getElementById("view-live").addEventListener("click",()=>{
+      window.open("./index.html","_blank","noopener,noreferrer");
     });
 
     document.getElementById("export").addEventListener("click",()=>{
@@ -352,8 +413,13 @@
       toast("Downloaded data.js");
     });
 
+    // Refresh status indicator as the user edits.
+    document.addEventListener("input", updateStatus);
+    document.addEventListener("click", ()=>setTimeout(updateStatus,50));
+
     bindContact();
     renderWatches();
+    updateStatus();
   })();
   </script>
 </body>
