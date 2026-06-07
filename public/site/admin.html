@@ -281,7 +281,9 @@
         state.watches[idx].images = imgs;
         img.src = input.value;
         img.style.opacity = 1;
-        if (i===0) watchEl.querySelector(".watch-thumb").src = input.value;
+        // first row in the list is the cover
+        const myIdx = [...row.parentElement.children].indexOf(row);
+        if (myIdx===0) watchEl.querySelector(".watch-thumb").src = input.value;
       });
       row.querySelector("button").addEventListener("click",()=>{
         const watchEl = row.closest(".watch");
