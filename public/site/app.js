@@ -6,24 +6,32 @@
    ============================================================ */
 
 (function () {
-  // Customers always see the PUBLISHED version. Admin can append
-  // ?preview=draft to view unpublished draft changes locally.
-  // Legacy key "eternis_data" is migrated to published on first load.
+  // Customers always see the PUBLISHED version. Admin can use:
+  //   ?preview=draft   → show current unpublished draft
+  //   ?preview=version → show an archived version stashed in sessionStorage
   let data = window.ETERNIS_DATA;
+  let previewLabel = "";
   try {
     const params = new URLSearchParams(location.search);
-    const wantDraft = params.get("preview") === "draft";
+    const mode = params.get("preview");
     const legacy = localStorage.getItem("eternis_data");
     if (legacy && !localStorage.getItem("eternis_data_published")) {
       localStorage.setItem("eternis_data_published", legacy);
       localStorage.removeItem("eternis_data");
     }
-    const key = wantDraft ? "eternis_data_draft" : "eternis_data_published";
-    const saved = localStorage.getItem(key) || localStorage.getItem("eternis_data_published");
+    let saved = null;
+    if (mode === "draft") {
+      saved = localStorage.getItem("eternis_data_draft");
+      previewLabel = "DRAFT PREVIEW · NOT VISIBLE TO CUSTOMERS";
+    } else if (mode === "version") {
+      saved = sessionStorage.getItem("eternis_data_version_preview");
+      previewLabel = "ARCHIVED VERSION PREVIEW · NOT VISIBLE TO CUSTOMERS";
+    }
+    if (!saved) saved = localStorage.getItem("eternis_data_published");
     if (saved) data = JSON.parse(saved);
-    if (wantDraft) {
+    if (previewLabel) {
       const banner = document.createElement("div");
-      banner.textContent = "DRAFT PREVIEW · NOT VISIBLE TO CUSTOMERS";
+      banner.textContent = previewLabel;
       banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#5a0e1f;color:#f6f1e8;text-align:center;padding:8px;font:600 11px/1 Inter,sans-serif;letter-spacing:.25em;";
       document.addEventListener("DOMContentLoaded", () => document.body.appendChild(banner));
     }
