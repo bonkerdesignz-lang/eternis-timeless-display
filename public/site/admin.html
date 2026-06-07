@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ETERNIS — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --wine:#5a0e1f; --wine-deep:#3d0814; --ivory:#f6f1e8; --ivory-warm:#ede4d3;
+      --ink:#1a1014; --ink-soft:#4a3a40; --line:rgba(90,14,31,.18); --line-soft:rgba(90,14,31,.08);
+      --gold:#c9a96a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--ivory);color:var(--ink);font-size:14px;line-height:1.5}
+    header{position:sticky;top:0;z-index:10;background:var(--wine);color:var(--ivory);padding:18px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--wine-deep)}
+    header h1{font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:500;letter-spacing:.35em}
+    header .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .container{max-width:1100px;margin:32px auto;padding:0 24px 80px}
+    .card{background:#fff;border:1px solid var(--line-soft);padding:24px;margin-bottom:20px}
+    .card h2{font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:500;margin-bottom:18px;color:var(--wine);border-bottom:1px solid var(--line-soft);padding-bottom:12px}
+    label{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;margin-top:14px}
+    input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--ivory);font:inherit;color:var(--ink);border-radius:0}
+    input:focus,textarea:focus{outline:none;border-color:var(--wine)}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--wine);color:var(--ivory);font-size:11px;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--wine);cursor:pointer;font-family:inherit;transition:all .2s}
+    .btn:hover{background:var(--wine-deep);border-color:var(--wine-deep)}
+    .btn.ghost{background:transparent;color:var(--ivory);border-color:rgba(255,255,255,.4)}
+    .btn.ghost:hover{background:rgba(255,255,255,.1)}
+    .btn.outline{background:transparent;color:var(--wine)}
+    .btn.outline:hover{background:var(--wine);color:var(--ivory)}
+    .btn.danger{background:#7a1a1a;border-color:#7a1a1a}
+    .btn.danger:hover{background:#5a0e0e}
+    .btn.sm{padding:6px 12px;font-size:10px}
+    .watch{border:1px solid var(--line-soft);padding:18px;margin-bottom:14px;background:var(--ivory)}
+    .watch-head{display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none}
+    .watch-thumb{width:56px;height:56px;background:#fff;border:1px solid var(--line-soft);object-fit:cover;flex-shrink:0}
+    .watch-head .meta{flex:1;min-width:0}
+    .watch-head .meta strong{display:block;font-family:"Cormorant Garamond",serif;font-size:18px;font-weight:500}
+    .watch-head .meta span{font-size:12px;color:var(--wine);letter-spacing:.1em}
+    .watch-head .ctrls{display:flex;gap:6px;flex-wrap:wrap}
+    .watch-body{display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft)}
+    .watch.open .watch-body{display:block}
+    .watch.open .chev{transform:rotate(90deg)}
+    .chev{transition:transform .2s;color:var(--wine)}
+    .images-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+    .image-row{display:flex;gap:8px;align-items:center}
+    .image-row img{width:40px;height:40px;object-fit:cover;border:1px solid var(--line-soft);background:#fff}
+    .image-row input{flex:1}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--wine);color:var(--ivory);padding:12px 24px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:0;transition:all .3s;pointer-events:none;z-index:100}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .hint{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5}
+    .corner{position:relative}
+    .corner::before,.corner::after{content:"";position:absolute;width:24px;height:24px;border:1px solid var(--gold)}
+    .corner::before{top:0;left:0;border-right:0;border-bottom:0}
+    .corner::after{bottom:0;right:0;border-left:0;border-top:0}
+    @media(max-width:640px){.row{grid-template-columns:1fr}header{padding:14px 18px;flex-direction:column;gap:10px;align-items:flex-start}.container{padding:0 14px 60px;margin-top:18px}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ETERNIS · ADMIN</h1>
+    <div class="actions">
+      <button class="btn ghost" id="preview">View Site</button>
+      <button class="btn ghost" id="export">Export data.js</button>
+      <button class="btn ghost" id="reset">Reset</button>
+      <button class="btn" id="save">Save Changes</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="card corner">
+      <h2>Contact Details</h2>
+      <div class="row">
+        <div>
+          <label>WhatsApp Number <small style="text-transform:none;letter-spacing:0;color:var(--ink-soft)">(international format, digits only)</small></label>
+          <input id="f-whatsapp" placeholder="15551234567" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input id="f-email" />
+        </div>
+      </div>
+      <label>Atelier / Address</label>
+      <input id="f-address" />
+      <div class="row" style="margin-top:6px">
+        <div><label>Instagram URL</label><input id="f-instagram" /></div>
+        <div><label>Facebook URL</label><input id="f-facebook" /></div>
+      </div>
+      <label>Twitter / X URL</label>
+      <input id="f-twitter" />
+    </div>
+
+    <div class="card">
+      <h2 style="display:flex;justify-content:space-between;align-items:center">
+        Watches
+        <button class="btn sm outline" id="add-watch">+ Add Watch</button>
+      </h2>
+      <div id="watches"></div>
+      <p class="hint" style="margin-top:18px">Use ↑ ↓ to reorder. Click a watch to expand and edit. Don't forget to <strong>Save Changes</strong>.</p>
+    </div>
+
+    <div class="card">
+      <h2>How saving works</h2>
+      <p class="hint">
+        Changes are saved to this browser (localStorage) and shown immediately on the site.
+        Click <strong>Export data.js</strong> to download an updated <code>data.js</code> file
+        you can replace in your project, or copy into Wix CMS as the source for your Watches collection.
+      </p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script src="./data.js"></script>
+  <script>
+  (function(){
+    const STORAGE = "eternis_data";
+    let state = loadState();
+
+    function loadState(){
+      try{
+        const saved = localStorage.getItem(STORAGE);
+        if(saved) return JSON.parse(saved);
+      }catch(e){}
+      return JSON.parse(JSON.stringify(window.ETERNIS_DATA));
+    }
+
+    function toast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 1800);
+    }
+
+    /* ---- Contact ---- */
+    function bindContact(){
+      f_whatsapp.value = state.contact.whatsapp || "";
+      f_email.value = state.contact.email || "";
+      f_address.value = state.contact.address || "";
+      f_instagram.value = state.contact.socials.instagram || "";
+      f_facebook.value = state.contact.socials.facebook || "";
+      f_twitter.value = state.contact.socials.twitter || "";
+    }
+    function readContact(){
+      state.contact.whatsapp = f_whatsapp.value.replace(/\D/g,"");
+      state.contact.email = f_email.value.trim();
+      state.contact.address = f_address.value.trim();
+      state.contact.socials.instagram = f_instagram.value.trim();
+      state.contact.socials.facebook = f_facebook.value.trim();
+      state.contact.socials.twitter = f_twitter.value.trim();
+    }
+
+    /* ---- Watches ---- */
+    const list = document.getElementById("watches");
+
+    function renderWatches(){
+      list.innerHTML = "";
+      state.watches.forEach((w, idx) => {
+        const el = document.createElement("div");
+        el.className = "watch";
+        el.dataset.idx = idx;
+        el.innerHTML = `
+          <div class="watch-head">
+            <img class="watch-thumb" src="${w.images[0]||''}" alt=""/>
+            <div class="meta">
+              <strong>${escapeHtml(w.name||'Untitled')}</strong>
+              <span>${escapeHtml(w.price||'')}</span>
+            </div>
+            <div class="ctrls">
+              <button class="btn sm outline" data-act="up" title="Move up">↑</button>
+              <button class="btn sm outline" data-act="down" title="Move down">↓</button>
+              <button class="btn sm danger" data-act="del" title="Delete">Remove</button>
+              <span class="chev">›</span>
+            </div>
+          </div>
+          <div class="watch-body">
+            <div class="row">
+              <div><label>Name</label><input data-f="name" value="${escapeAttr(w.name)}"/></div>
+              <div><label>Price</label><input data-f="price" value="${escapeAttr(w.price)}"/></div>
+            </div>
+            <label>ID <small style="text-transform:none;letter-spacing:0;color:var(--ink-soft)">(used internally — letters, numbers, dashes)</small></label>
+            <input data-f="id" value="${escapeAttr(w.id)}"/>
+            <label>Description</label>
+            <textarea data-f="description">${escapeHtml(w.description)}</textarea>
+            <label>Images <small style="text-transform:none;letter-spacing:0;color:var(--ink-soft)">(first image is the cover)</small></label>
+            <div class="images-list" data-images></div>
+            <button class="btn sm outline" data-act="add-img" style="margin-top:8px">+ Add image</button>
+          </div>
+        `;
+        // populate images
+        const imgs = el.querySelector("[data-images]");
+        w.images.forEach((src, i) => imgs.appendChild(imageRow(src, i)));
+
+        // header toggle
+        el.querySelector(".watch-head").addEventListener("click", (e)=>{
+          if (e.target.closest("button")) return;
+          el.classList.toggle("open");
+        });
+
+        // header buttons
+        el.querySelectorAll(".ctrls [data-act]").forEach(btn=>{
+          btn.addEventListener("click",(e)=>{
+            e.stopPropagation();
+            const act = btn.dataset.act;
+            if (act==="up" && idx>0) swap(idx, idx-1);
+            if (act==="down" && idx<state.watches.length-1) swap(idx, idx+1);
+            if (act==="del"){
+              if(confirm("Remove "+(w.name||"this watch")+"?")){
+                state.watches.splice(idx,1); renderWatches();
+              }
+            }
+          });
+        });
+
+        // field inputs
+        el.querySelectorAll("[data-f]").forEach(inp=>{
+          inp.addEventListener("input",()=>{
+            state.watches[idx][inp.dataset.f] = inp.value;
+            if (inp.dataset.f==="name") el.querySelector(".meta strong").textContent = inp.value||"Untitled";
+            if (inp.dataset.f==="price") el.querySelector(".meta span").textContent = inp.value||"";
+          });
+        });
+
+        // add image
+        el.querySelector('[data-act="add-img"]').addEventListener("click",()=>{
+          state.watches[idx].images.push("");
+          const i = state.watches[idx].images.length-1;
+          imgs.appendChild(imageRow("", i, idx));
+        });
+
+        list.appendChild(el);
+      });
+    }
+
+    function imageRow(src, i){
+      const row = document.createElement("div");
+      row.className = "image-row";
+      row.innerHTML = `
+        <img src="${src||''}" onerror="this.style.opacity=.2"/>
+        <input type="url" placeholder="https://..." value="${escapeAttr(src)}"/>
+        <button class="btn sm danger" type="button">×</button>
+      `;
+      const input = row.querySelector("input");
+      const img = row.querySelector("img");
+      input.addEventListener("input",()=>{
+        const watchEl = row.closest(".watch");
+        const idx = +watchEl.dataset.idx;
+        const imgs = [...watchEl.querySelectorAll(".image-row input")].map(x=>x.value);
+        state.watches[idx].images = imgs;
+        img.src = input.value;
+        img.style.opacity = 1;
+        if (i===0) watchEl.querySelector(".watch-thumb").src = input.value;
+      });
+      row.querySelector("button").addEventListener("click",()=>{
+        const watchEl = row.closest(".watch");
+        const idx = +watchEl.dataset.idx;
+        row.remove();
+        const imgs = [...watchEl.querySelectorAll(".image-row input")].map(x=>x.value);
+        state.watches[idx].images = imgs;
+        watchEl.querySelector(".watch-thumb").src = imgs[0]||"";
+      });
+      return row;
+    }
+
+    function swap(a,b){
+      const tmp = state.watches[a];
+      state.watches[a] = state.watches[b];
+      state.watches[b] = tmp;
+      renderWatches();
+    }
+
+    function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+    function escapeAttr(s){ return escapeHtml(s); }
+
+    /* ---- Actions ---- */
+    document.getElementById("add-watch").addEventListener("click",()=>{
+      state.watches.push({
+        id: "watch-"+Date.now(),
+        name: "New Watch",
+        price: "$0",
+        description: "",
+        images: [""]
+      });
+      renderWatches();
+      // open the newly added one
+      const last = list.lastElementChild;
+      if (last) { last.classList.add("open"); last.scrollIntoView({behavior:"smooth", block:"center"}); }
+    });
+
+    document.getElementById("save").addEventListener("click",()=>{
+      readContact();
+      localStorage.setItem(STORAGE, JSON.stringify(state));
+      toast("Saved · refresh the site to see changes");
+    });
+
+    document.getElementById("reset").addEventListener("click",()=>{
+      if(!confirm("Discard all changes and reload defaults from data.js?")) return;
+      localStorage.removeItem(STORAGE);
+      state = loadState();
+      bindContact(); renderWatches();
+      toast("Reset to defaults");
+    });
+
+    document.getElementById("preview").addEventListener("click",()=>{
+      window.open("./index.html","_blank");
+    });
+
+    document.getElementById("export").addEventListener("click",()=>{
+      readContact();
+      const content =
+        "/* ETERNIS data — exported "+new Date().toISOString()+" */\n" +
+        "window.ETERNIS_DATA = " + JSON.stringify(state, null, 2) + ";\n";
+      const blob = new Blob([content], {type:"application/javascript"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "data.js"; a.click();
+      URL.revokeObjectURL(url);
+      toast("Downloaded data.js");
+    });
+
+    bindContact();
+    renderWatches();
+  })();
+  </script>
+</body>
+</html>
