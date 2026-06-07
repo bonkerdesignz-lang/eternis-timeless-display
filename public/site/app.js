@@ -32,7 +32,9 @@
     card.innerHTML = `
       <div class="card__media">
         <img src="${w.images[0]}" alt="${w.name}" loading="lazy" />
+        <span class="card__view">View Piece</span>
       </div>
+      <div class="card__divider"></div>
       <h3 class="card__name">${w.name}</h3>
       <div class="card__price">${w.price}</div>
     `;
@@ -43,7 +45,7 @@
   /* ---------- Contact rendering ---------- */
   const c = data.contact;
   const waLink = (msg) =>
-    `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(msg)}`;
+    `https://web.whatsapp.com/send?phone=${c.whatsapp}&text=${encodeURIComponent(msg)}`;
 
   document.getElementById("wa-main").href = waLink(
     "Hello ETERNIS, I would like to inquire about your collection."

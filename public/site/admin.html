@@ -185,9 +185,15 @@
             <input data-f="id" value="${escapeAttr(w.id)}"/>
             <label>Description</label>
             <textarea data-f="description">${escapeHtml(w.description)}</textarea>
-            <label>Images <small style="text-transform:none;letter-spacing:0;color:var(--ink-soft)">(first image is the cover)</small></label>
+            <label>Images <small style="text-transform:none;letter-spacing:0;color:var(--ink-soft)">(first image is the cover · upload files or paste URLs)</small></label>
             <div class="images-list" data-images></div>
-            <button class="btn sm outline" data-act="add-img" style="margin-top:8px">+ Add image</button>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn sm outline" data-act="add-img" type="button">+ Add image URL</button>
+              <label class="btn sm outline" style="cursor:pointer;margin:0">
+                + Upload from device
+                <input type="file" accept="image/*" multiple data-act="upload-img" style="display:none"/>
+              </label>
+            </div>
           </div>
         `;
         // populate images
@@ -224,11 +230,34 @@
           });
         });
 
-        // add image
+        // add image URL
         el.querySelector('[data-act="add-img"]').addEventListener("click",()=>{
           state.watches[idx].images.push("");
-          const i = state.watches[idx].images.length-1;
-          imgs.appendChild(imageRow("", i, idx));
+          imgs.appendChild(imageRow("", idx));
+        });
+
+        // upload image(s) from device → base64
+        el.querySelector('[data-act="upload-img"]').addEventListener("change",(e)=>{
+          const files = [...e.target.files];
+          let done = 0;
+          files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = reader.result;
+              state.watches[idx].images.push(dataUrl);
+              const row = imageRow(dataUrl, idx);
+              imgs.appendChild(row);
+              // also update state from final inputs
+              const allInputs = [...el.querySelectorAll(".image-row input[type='url']")].map(x=>x.value);
+              state.watches[idx].images = allInputs;
+              el.querySelector(".watch-thumb").src = state.watches[idx].images[0]||"";
+              if(++done === files.length) {
+                e.target.value = "";
+                toast(files.length+" image(s) added · remember to Save");
+              }
+            };
+            reader.readAsDataURL(file);
+          });
         });
 
         list.appendChild(el);
@@ -252,7 +281,9 @@
         state.watches[idx].images = imgs;
         img.src = input.value;
         img.style.opacity = 1;
-        if (i===0) watchEl.querySelector(".watch-thumb").src = input.value;
+        // first row in the list is the cover
+        const myIdx = [...row.parentElement.children].indexOf(row);
+        if (myIdx===0) watchEl.querySelector(".watch-thumb").src = input.value;
       });
       row.querySelector("button").addEventListener("click",()=>{
         const watchEl = row.closest(".watch");
