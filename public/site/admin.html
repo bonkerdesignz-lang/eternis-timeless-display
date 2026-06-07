@@ -360,20 +360,44 @@
 
     document.getElementById("save").addEventListener("click",()=>{
       readContact();
-      localStorage.setItem(STORAGE, JSON.stringify(state));
-      toast("Saved · refresh the site to see changes");
+      localStorage.setItem(DRAFT, JSON.stringify(state));
+      lastSavedSnapshot = JSON.stringify(state);
+      updateStatus();
+      toast("Draft saved · customers still see published version");
+    });
+
+    document.getElementById("publish").addEventListener("click",()=>{
+      readContact();
+      if(!confirm("Publish these changes live? Customers will see the updated site immediately.")) return;
+      const payload = JSON.stringify(state);
+      localStorage.setItem(PUBLISHED, payload);
+      localStorage.setItem(DRAFT, payload);
+      lastSavedSnapshot = payload;
+      updateStatus();
+      toast("Published live");
     });
 
     document.getElementById("reset").addEventListener("click",()=>{
-      if(!confirm("Discard all changes and reload defaults from data.js?")) return;
-      localStorage.removeItem(STORAGE);
+      if(!confirm("Discard the current draft and revert to the published version?")) return;
+      localStorage.removeItem(DRAFT);
       state = loadState();
+      lastSavedSnapshot = JSON.stringify(state);
       bindContact(); renderWatches();
-      toast("Reset to defaults");
+      updateStatus();
+      toast("Draft discarded");
     });
 
     document.getElementById("preview").addEventListener("click",()=>{
-      window.open("./index.html","_blank");
+      readContact();
+      // Persist current edits as draft so preview reflects them.
+      localStorage.setItem(DRAFT, JSON.stringify(state));
+      lastSavedSnapshot = JSON.stringify(state);
+      updateStatus();
+      window.open("./index.html?preview=draft","_blank","noopener,noreferrer");
+    });
+
+    document.getElementById("view-live").addEventListener("click",()=>{
+      window.open("./index.html","_blank","noopener,noreferrer");
     });
 
     document.getElementById("export").addEventListener("click",()=>{
@@ -389,8 +413,13 @@
       toast("Downloaded data.js");
     });
 
+    // Refresh status indicator as the user edits.
+    document.addEventListener("input", updateStatus);
+    document.addEventListener("click", ()=>setTimeout(updateStatus,50));
+
     bindContact();
     renderWatches();
+    updateStatus();
   })();
   </script>
 </body>
