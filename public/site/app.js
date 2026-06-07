@@ -32,7 +32,9 @@
     card.innerHTML = `
       <div class="card__media">
         <img src="${w.images[0]}" alt="${w.name}" loading="lazy" />
+        <span class="card__view">View Piece</span>
       </div>
+      <div class="card__divider"></div>
       <h3 class="card__name">${w.name}</h3>
       <div class="card__price">${w.price}</div>
     `;
