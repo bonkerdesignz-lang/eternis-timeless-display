@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "eternis" },
+      { name: "description", content: "ETERNIS Watch Showcase is a modern luxury watch company website." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "eternis" },
+      { property: "og:description", content: "ETERNIS Watch Showcase is a modern luxury watch company website." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "eternis" },
+      { name: "twitter:description", content: "ETERNIS Watch Showcase is a modern luxury watch company website." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f54e7ef1-5a02-4b9b-a097-c631a1dae25a/id-preview-8ef53ba7--e06dff9f-e8f7-4318-a105-7789d8819536.lovable.app-1780854816354.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f54e7ef1-5a02-4b9b-a097-c631a1dae25a/id-preview-8ef53ba7--e06dff9f-e8f7-4318-a105-7789d8819536.lovable.app-1780854816354.png" },
     ],
     links: [
       {
