@@ -1,29 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "ETERNIS — Fine Timepieces" },
+      { name: "description", content: "ETERNIS — a quiet pursuit of mechanical excellence. Discover our collection of fine Swiss timepieces." },
+      { property: "og:title", content: "ETERNIS — Fine Timepieces" },
+      { property: "og:description", content: "A quiet pursuit of mechanical excellence." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  // The site is built as pure HTML/CSS/JS in /public/site for Wix portability.
+  // The preview here loads it full-screen via iframe so what you see is what you ship.
+  useEffect(() => {
+    document.body.style.margin = "0";
+    document.body.style.overflow = "hidden";
+  }, []);
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <iframe
+      src="/site/index.html"
+      title="ETERNIS"
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        border: 0,
+      }}
+    />
   );
 }
