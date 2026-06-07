@@ -43,7 +43,7 @@
   /* ---------- Contact rendering ---------- */
   const c = data.contact;
   const waLink = (msg) =>
-    `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(msg)}`;
+    `https://web.whatsapp.com/send?phone=${c.whatsapp}&text=${encodeURIComponent(msg)}`;
 
   document.getElementById("wa-main").href = waLink(
     "Hello ETERNIS, I would like to inquire about your collection."
