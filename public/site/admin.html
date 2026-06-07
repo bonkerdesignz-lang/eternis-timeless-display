@@ -144,7 +144,35 @@
   (function(){
     const DRAFT = "eternis_data_draft";
     const PUBLISHED = "eternis_data_published";
+    const HISTORY = "eternis_data_history";
+    const HISTORY_MAX = 20;
     const LEGACY = "eternis_data";
+
+    function loadHistory(){
+      try { return JSON.parse(localStorage.getItem(HISTORY)||"[]"); } catch(e){ return []; }
+    }
+    function saveHistory(arr){
+      localStorage.setItem(HISTORY, JSON.stringify(arr.slice(0, HISTORY_MAX)));
+    }
+    function pushHistory(label, payload){
+      if (!payload) return;
+      const arr = loadHistory();
+      // Skip if identical to most-recent entry.
+      if (arr[0] && arr[0].data === payload) return;
+      arr.unshift({ id: "v"+Date.now(), at: Date.now(), label, data: payload });
+      saveHistory(arr);
+    }
+    function summarize(payload){
+      try{
+        const d = JSON.parse(payload);
+        const n = (d.watches||[]).length;
+        return n + " watch" + (n===1?"":"es") + " · " + (d.contact && d.contact.whatsapp ? "WA "+d.contact.whatsapp : "no WhatsApp");
+      }catch(e){ return ""; }
+    }
+    function fmtTime(ts){
+      const d = new Date(ts);
+      return d.toLocaleString(undefined,{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+    }
 
     // One-time migration from legacy single-state key.
     try {
