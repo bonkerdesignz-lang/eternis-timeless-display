@@ -470,8 +470,84 @@
     document.addEventListener("input", updateStatus);
     document.addEventListener("click", ()=>setTimeout(updateStatus,50));
 
+    /* ---- Version history ---- */
+    const historyList = document.getElementById("history-list");
+
+    function renderHistory(){
+      const arr = loadHistory();
+      const currentPub = localStorage.getItem(PUBLISHED);
+      historyList.innerHTML = "";
+
+      if (currentPub) {
+        historyList.appendChild(versionRow({
+          id:"current", at:null, label:"Current Published",
+          data: currentPub, isCurrent:true
+        }));
+      }
+      if (arr.length === 0 && !currentPub) {
+        const e = document.createElement("div");
+        e.className = "empty";
+        e.textContent = "No published versions yet. Click Publish Live to create the first one.";
+        historyList.appendChild(e);
+        return;
+      }
+      arr.forEach(v => historyList.appendChild(versionRow(v)));
+    }
+
+    function versionRow(v){
+      const row = document.createElement("div");
+      row.className = "version" + (v.isCurrent ? " current" : "");
+      const time = v.isCurrent ? "Live now" : fmtTime(v.at);
+      row.innerHTML = `
+        <div class="vmeta">
+          <div class="vtime">${escapeHtml(time)}${v.isCurrent ? '<span class="badge">LIVE</span>' : ''}</div>
+          <div class="vsum">${escapeHtml(summarize(v.data))}</div>
+        </div>
+        <div class="vctrls">
+          <button class="btn sm outline" data-act="preview">Preview</button>
+          ${v.isCurrent ? '' : '<button class="btn sm outline" data-act="restore">Load as Draft</button>'}
+          ${v.isCurrent ? '' : '<button class="btn sm" data-act="republish">Republish</button>'}
+          ${v.isCurrent ? '' : '<button class="btn sm danger" data-act="delete">×</button>'}
+        </div>
+      `;
+      row.querySelector('[data-act="preview"]').addEventListener("click",()=>{
+        sessionStorage.setItem("eternis_data_version_preview", v.data);
+        window.open("./index.html?preview=version","_blank","noopener,noreferrer");
+      });
+      const restoreBtn = row.querySelector('[data-act="restore"]');
+      if (restoreBtn) restoreBtn.addEventListener("click",()=>{
+        if(!confirm("Load this version into the draft? Your current unsaved draft will be replaced.")) return;
+        localStorage.setItem(DRAFT, v.data);
+        state = JSON.parse(v.data);
+        lastSavedSnapshot = v.data;
+        bindContact(); renderWatches(); updateStatus();
+        toast("Loaded as draft · review then Publish");
+      });
+      const rb = row.querySelector('[data-act="republish"]');
+      if (rb) rb.addEventListener("click",()=>{
+        if(!confirm("Republish this version live? The current live version will be archived.")) return;
+        const prev = localStorage.getItem(PUBLISHED);
+        if (prev && prev !== v.data) pushHistory("Published", prev);
+        localStorage.setItem(PUBLISHED, v.data);
+        localStorage.setItem(DRAFT, v.data);
+        state = JSON.parse(v.data);
+        lastSavedSnapshot = v.data;
+        bindContact(); renderWatches(); renderHistory(); updateStatus();
+        toast("Republished live");
+      });
+      const del = row.querySelector('[data-act="delete"]');
+      if (del) del.addEventListener("click",()=>{
+        if(!confirm("Delete this archived version permanently?")) return;
+        saveHistory(loadHistory().filter(x => x.id !== v.id));
+        renderHistory();
+        toast("Version deleted");
+      });
+      return row;
+    }
+
     bindContact();
     renderWatches();
+    renderHistory();
     updateStatus();
   })();
   </script>
