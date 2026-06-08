@@ -7,12 +7,290 @@
   <meta name="description" content="ETERNIS — a quiet pursuit of mechanical excellence. Discover our collection of fine Swiss timepieces." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+  /* ============================================================
+     ETERNIS — All-in-one stylesheet (site + admin)
+     ============================================================ */
+  :root{
+    --wine:#4a0d1a; --wine-deep:#2e0610; --wine-rich:#6b1226; --wine-soft:#8a1d33;
+    --crimson:#5c0a18; --maroon:#3a0a14;
+    --gold:#b08a4a; --gold-soft:#d4b886; --gold-deep:#8a6a32;
+    --cream:#f5efe3; --cream-warm:#ece2cf; --cream-deep:#e0d3b8; --paper:#fbf7ee;
+    --ink:#1a0d10; --ink-soft:#4a2a30; --ink-mute:#6b4a52;
+    --line:rgba(74,13,26,.22); --line-soft:rgba(74,13,26,.10); --line-gold:rgba(176,138,74,.35);
+    --font-display:"Cormorant Garamond",Georgia,serif;
+    --font-body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --max-w:1280px;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --shadow-luxe:0 30px 60px -30px rgba(46,6,16,.45),0 14px 30px -18px rgba(46,6,16,.25);
+    --shadow-soft:0 18px 40px -22px rgba(46,6,16,.25);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{font-family:var(--font-body);color:var(--ink);background:var(--paper);line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+  /* Decorative backgrounds */
+  .bg-decor{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .bg-decor::before,.bg-decor::after{content:"";position:absolute;border-radius:50%;filter:blur(100px)}
+  .bg-decor::before{width:620px;height:620px;background:radial-gradient(circle,var(--wine) 0%,transparent 65%);top:-180px;left:-160px;opacity:.16}
+  .bg-decor::after{width:520px;height:520px;background:radial-gradient(circle,var(--crimson) 0%,transparent 65%);bottom:-180px;right:-160px;opacity:.13}
+  .bg-pattern{position:absolute;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 1px 1px,var(--line) .8px,transparent 0),linear-gradient(180deg,transparent 0%,rgba(74,13,26,.02) 100%);background-size:32px 32px,100% 100%;opacity:.55;mask-image:radial-gradient(ellipse at center,black 35%,transparent 85%);-webkit-mask-image:radial-gradient(ellipse at center,black 35%,transparent 85%)}
+  .bg-frame{position:absolute;inset:28px;pointer-events:none;z-index:0}
+  .bg-frame::before,.bg-frame::after{content:"";position:absolute;width:72px;height:72px;border:1px solid var(--line-gold)}
+  .bg-frame::before{top:0;left:0;border-right:0;border-bottom:0}
+  .bg-frame::after{bottom:0;right:0;border-left:0;border-top:0}
+
+  /* Nav */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 40px;display:flex;justify-content:space-between;align-items:center;background:rgba(251,247,238,.82);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid var(--line-soft);transition:padding .4s var(--ease),background .4s var(--ease)}
+  .nav.scrolled{padding:14px 40px;background:rgba(251,247,238,.94)}
+  .nav__brand{font-family:var(--font-display);font-size:22px;letter-spacing:.4em;font-weight:500;color:var(--wine)}
+  .nav__links{display:flex;gap:38px}
+  .nav__link{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-soft);position:relative;padding:4px 0;transition:color .3s var(--ease);font-weight:500}
+  .nav__link::after{content:"";position:absolute;left:50%;bottom:-2px;width:0;height:1px;background:var(--wine);transition:all .3s var(--ease)}
+  .nav__link:hover{color:var(--wine)} .nav__link:hover::after{width:100%;left:0}
+  .nav__toggle{display:none}
+
+  section{position:relative;padding:160px 40px}
+  .wrap{max-width:var(--max-w);margin:0 auto;position:relative;z-index:1}
+
+  .eyebrow{font-size:10px;letter-spacing:.45em;text-transform:uppercase;color:var(--wine);margin-bottom:22px;display:inline-flex;align-items:center;gap:14px;font-weight:600}
+  .eyebrow::before,.eyebrow::after{content:"";width:36px;height:1px;background:linear-gradient(90deg,transparent,var(--wine),transparent)}
+  .eyebrow.left::before{display:none}.eyebrow.left{padding-left:0}
+  .eyebrow.left::after{background:linear-gradient(90deg,var(--wine),transparent)}
+  .section-title{font-family:var(--font-display);font-size:clamp(38px,5.5vw,62px);font-weight:400;letter-spacing:.005em;color:var(--ink);margin-bottom:20px;line-height:1.05}
+  .section-title em{color:var(--wine);font-style:italic}
+  .section-sub{color:var(--ink-mute);max-width:580px;font-size:15px;font-weight:300}
+  .section-head{text-align:center;margin-bottom:90px}
+  .section-head .eyebrow{justify-content:center}
+  .section-head .section-sub{margin:0 auto}
+
+  /* Hero */
+  #home{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse at top,rgba(74,13,26,.06) 0%,transparent 60%),radial-gradient(ellipse at bottom,rgba(176,138,74,.05) 0%,transparent 60%),linear-gradient(180deg,var(--paper) 0%,var(--cream) 100%);padding-top:120px;overflow:hidden}
+  .hero{position:relative;z-index:2;max-width:920px;padding:0 20px}
+  .hero__mark{display:inline-flex;align-items:center;gap:18px;font-size:10px;letter-spacing:.5em;text-transform:uppercase;color:var(--wine);margin-bottom:40px;font-weight:600}
+  .hero__mark span{width:48px;height:1px;background:var(--wine);opacity:.5}
+  .hero__title{font-family:var(--font-display);font-size:clamp(72px,14vw,184px);font-weight:400;letter-spacing:.14em;line-height:.95;margin-bottom:32px;background:linear-gradient(180deg,var(--wine-rich) 0%,var(--wine-deep) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero__rule{width:80px;height:1px;background:var(--gold);margin:0 auto 32px;opacity:.6}
+  .hero__tagline{font-family:var(--font-display);font-style:italic;font-size:clamp(18px,2vw,24px);color:var(--ink-soft);margin-bottom:56px;letter-spacing:.04em}
+  .hero__cta{display:inline-flex;align-items:center;gap:14px;padding:18px 40px;background:var(--wine);color:var(--cream);font-size:11px;letter-spacing:.35em;text-transform:uppercase;font-weight:500;transition:all .5s var(--ease);border:1px solid var(--wine);position:relative;overflow:hidden}
+  .hero__cta::before{content:"";position:absolute;inset:0;background:var(--wine-deep);transform:translateY(100%);transition:transform .5s var(--ease);z-index:0}
+  .hero__cta:hover::before{transform:translateY(0)}
+  .hero__cta span,.hero__cta svg{position:relative;z-index:1}
+  .hero__cta svg{width:14px;height:14px;transition:transform .3s var(--ease)}
+  .hero__cta:hover svg{transform:translateX(4px)}
+  .hero__numerals{position:absolute;font-family:var(--font-display);font-size:16vw;color:var(--wine);opacity:.035;pointer-events:none;font-style:italic;line-height:1;z-index:1}
+  .hero__numerals.left{top:12%;left:5%}
+  .hero__numerals.right{bottom:12%;right:5%}
+
+  /* Collection */
+  #collection{background:linear-gradient(180deg,var(--paper) 0%,var(--cream) 50%,var(--paper) 100%);border-top:1px solid var(--line-soft)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:72px 48px}
+  .card{cursor:pointer;display:flex;flex-direction:column;position:relative;transition:transform .6s var(--ease)}
+  .card__media{aspect-ratio:4/5;background:linear-gradient(160deg,#fff 0%,var(--cream-warm) 100%);overflow:hidden;position:relative;margin-bottom:28px;box-shadow:var(--shadow-soft);transition:box-shadow .6s var(--ease),transform .6s var(--ease)}
+  .card__media::before{content:"";position:absolute;inset:0;border:1px solid var(--line-soft);pointer-events:none;z-index:2}
+  .card__media::after{content:"";position:absolute;top:12px;right:12px;width:22px;height:22px;border-top:1px solid var(--gold);border-right:1px solid var(--gold);opacity:.6;z-index:2;transition:all .4s var(--ease)}
+  .card:hover .card__media{box-shadow:var(--shadow-luxe);transform:translateY(-4px)}
+  .card:hover .card__media::after{width:30px;height:30px;top:8px;right:8px;opacity:1}
+  .card__media img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+  .card:hover .card__media img{transform:scale(1.05)}
+  .card__view{position:absolute;left:50%;bottom:24px;transform:translate(-50%,12px);background:var(--wine-deep);color:var(--cream);padding:10px 22px;font-size:9px;letter-spacing:.4em;text-transform:uppercase;font-weight:600;opacity:0;transition:all .5s var(--ease);z-index:3;border:1px solid rgba(255,255,255,.1)}
+  .card:hover .card__view{opacity:1;transform:translate(-50%,0)}
+  .card__divider{width:24px;height:1px;background:var(--gold);opacity:.5;margin-bottom:12px}
+  .card__name{font-family:var(--font-display);font-size:26px;font-weight:500;margin-bottom:8px;color:var(--ink);transition:color .3s var(--ease)}
+  .card:hover .card__name{color:var(--wine)}
+  .card__price{color:var(--wine);font-size:13px;letter-spacing:.2em;font-weight:500}
+
+  /* Contact */
+  #contact{background:linear-gradient(180deg,var(--paper) 0%,var(--cream-warm) 100%);border-top:1px solid var(--line-soft)}
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+  .contact-info p{color:var(--ink-mute);margin-bottom:36px;max-width:480px;font-weight:300}
+  .contact-list{list-style:none}
+  .contact-list li{padding:20px 0;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;font-size:14px;gap:20px}
+  .contact-list .label{font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--wine);font-weight:600}
+  .contact-list .val{color:var(--ink-soft);text-align:right}
+  .contact-card{background:linear-gradient(160deg,#fff 0%,var(--cream) 100%);padding:64px 56px;text-align:center;position:relative;box-shadow:var(--shadow-luxe)}
+  .contact-card::before,.contact-card::after{content:"";position:absolute;width:48px;height:48px;border:1px solid var(--gold);opacity:.7}
+  .contact-card::before{top:14px;left:14px;border-right:0;border-bottom:0}
+  .contact-card::after{bottom:14px;right:14px;border-left:0;border-top:0}
+  .contact-card h3{font-family:var(--font-display);font-size:34px;margin-bottom:14px;font-weight:400;color:var(--wine)}
+  .contact-card p{color:var(--ink-mute);margin-bottom:36px;font-weight:300}
+  .wa-btn{display:inline-flex;align-items:center;gap:12px;padding:16px 34px;background:var(--wine);color:var(--cream);font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:500;transition:all .4s var(--ease);border:1px solid var(--wine)}
+  .wa-btn:hover{background:var(--wine-deep);border-color:var(--wine-deep);transform:translateY(-2px);box-shadow:0 10px 30px -10px rgba(74,13,26,.45)}
+  .wa-btn svg{width:16px;height:16px}
+  .socials{display:flex;gap:16px;justify-content:center;margin-top:32px}
+  .socials a{width:44px;height:44px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--wine);transition:all .35s var(--ease);background:rgba(255,255,255,.5)}
+  .socials a:hover{background:var(--wine);color:var(--cream);border-color:var(--wine);transform:translateY(-2px)}
+  .socials svg{width:16px;height:16px}
+
+  /* Footer */
+  footer{background:linear-gradient(180deg,var(--wine-deep) 0%,var(--maroon) 100%);color:var(--cream);padding:56px 40px 40px;text-align:center;position:relative}
+  footer::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:80px;height:1px;background:var(--gold);opacity:.6}
+  footer .brand{font-family:var(--font-display);font-size:24px;letter-spacing:.45em;margin-bottom:10px;font-weight:500}
+  footer .tag{font-family:var(--font-display);font-style:italic;opacity:.7;margin-bottom:22px;font-size:14px}
+  footer .meta{font-size:11px;opacity:.55;letter-spacing:.2em;display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  footer .meta a{border-bottom:1px solid rgba(245,239,227,.3);padding-bottom:1px;cursor:pointer}
+  footer .meta a:hover{opacity:1}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;z-index:200;background:rgba(26,13,16,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none;overflow-y:auto}
+  .modal.open{display:block}
+  .modal__inner{max-width:1200px;margin:60px auto;background:var(--paper);position:relative;display:grid;grid-template-columns:1.1fr 1fr;min-height:600px;box-shadow:0 40px 100px -20px rgba(0,0,0,.6)}
+  .modal__inner::before,.modal__inner::after{content:"";position:absolute;width:36px;height:36px;border:1px solid var(--gold);opacity:.6;pointer-events:none}
+  .modal__inner::before{top:12px;left:12px;border-right:0;border-bottom:0}
+  .modal__inner::after{bottom:12px;right:12px;border-left:0;border-top:0}
+  .modal__close{position:absolute;top:20px;right:20px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(251,247,238,.95);border:1px solid var(--line);z-index:10;transition:all .3s var(--ease);color:var(--wine)}
+  .modal__close:hover{background:var(--wine);color:var(--cream);border-color:var(--wine)}
+  .gallery{background:linear-gradient(160deg,#fff 0%,var(--cream-warm) 100%);padding:48px;display:flex;flex-direction:column;gap:18px}
+  .gallery__main{flex:1;position:relative;overflow:hidden;cursor:zoom-in;background:#fff;border:1px solid var(--line-soft);min-height:420px;box-shadow:var(--shadow-soft)}
+  .gallery__main img{width:100%;height:100%;object-fit:contain;transition:transform .3s var(--ease)}
+  .gallery__main.zoomed{cursor:zoom-out}
+  .gallery__main.zoomed img{transform:scale(2.4)}
+  .gallery__thumbs{display:flex;gap:12px;flex-wrap:wrap}
+  .gallery__thumbs button{width:78px;height:78px;border:1px solid var(--line-soft);overflow:hidden;transition:all .3s var(--ease);background:#fff;opacity:.7}
+  .gallery__thumbs button:hover{opacity:1}
+  .gallery__thumbs button.active{border-color:var(--wine);opacity:1;box-shadow:0 4px 12px -4px rgba(74,13,26,.3)}
+  .gallery__thumbs img{width:100%;height:100%;object-fit:cover}
+  .detail{padding:72px 60px;display:flex;flex-direction:column;justify-content:center}
+  .detail__eyebrow{font-size:10px;letter-spacing:.45em;text-transform:uppercase;color:var(--wine);margin-bottom:22px;font-weight:600;display:flex;align-items:center;gap:14px}
+  .detail__eyebrow::after{content:"";flex:1;height:1px;background:var(--gold);opacity:.4}
+  .detail__name{font-family:var(--font-display);font-size:44px;font-weight:400;margin-bottom:16px;line-height:1.05;color:var(--ink)}
+  .detail__price{font-size:18px;color:var(--wine);letter-spacing:.2em;font-weight:500;margin-bottom:36px;padding-bottom:36px;border-bottom:1px solid var(--line-soft)}
+  .detail__desc{color:var(--ink-soft);margin-bottom:44px;line-height:1.85;font-weight:300;font-size:15px}
+  .detail__hint{font-size:10px;color:var(--ink-mute);opacity:.7;margin-top:22px;letter-spacing:.2em;text-transform:uppercase}
+
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* Preview banner */
+  .preview-banner{position:fixed;top:0;left:0;right:0;z-index:9999;background:#5a0e1f;color:#f6f1e8;text-align:center;padding:8px;font:600 11px/1 Inter,sans-serif;letter-spacing:.25em}
+
+  /* ============== ADMIN ============== */
+  .admin-body{background:var(--cream);font-family:var(--font-body)}
+  .admin-header{position:sticky;top:0;z-index:10;background:var(--wine);color:var(--cream);padding:18px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--wine-deep);flex-wrap:wrap;gap:10px}
+  .admin-header h1{font-family:var(--font-display);font-size:22px;font-weight:500;letter-spacing:.35em}
+  .admin-header .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .admin-container{max-width:1100px;margin:32px auto;padding:0 24px 80px}
+  .acard{background:#fff;border:1px solid var(--line-soft);padding:24px;margin-bottom:20px}
+  .acard h2{font-family:var(--font-display);font-size:22px;font-weight:500;margin-bottom:18px;color:var(--wine);border-bottom:1px solid var(--line-soft);padding-bottom:12px}
+  .alabel{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;margin-top:14px}
+  .ainput,.atextarea{width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--cream);font:inherit;color:var(--ink);border-radius:0;font-size:14px}
+  .ainput:focus,.atextarea:focus{outline:none;border-color:var(--wine)}
+  .atextarea{min-height:80px;resize:vertical}
+  .arow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .abtn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--wine);color:var(--cream);font-size:11px;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--wine);cursor:pointer;font-family:inherit;transition:all .2s}
+  .abtn:hover{background:var(--wine-deep);border-color:var(--wine-deep)}
+  .abtn.ghost{background:transparent;color:var(--cream);border-color:rgba(255,255,255,.4)}
+  .abtn.ghost:hover{background:rgba(255,255,255,.1)}
+  .abtn.outline{background:transparent;color:var(--wine)}
+  .abtn.outline:hover{background:var(--wine);color:var(--cream)}
+  .abtn.danger{background:#7a1a1a;border-color:#7a1a1a;color:var(--cream)}
+  .abtn.danger:hover{background:#5a0e0e}
+  .abtn.sm{padding:6px 12px;font-size:10px}
+  .watch-item{border:1px solid var(--line-soft);padding:18px;margin-bottom:14px;background:var(--cream)}
+  .watch-head{display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;flex-wrap:wrap}
+  .watch-thumb{width:56px;height:56px;background:#fff;border:1px solid var(--line-soft);object-fit:cover;flex-shrink:0}
+  .watch-head .wmeta{flex:1;min-width:160px}
+  .watch-head .wmeta strong{display:block;font-family:var(--font-display);font-size:18px;font-weight:500}
+  .watch-head .wmeta span{font-size:12px;color:var(--wine);letter-spacing:.1em}
+  .watch-head .ctrls{display:flex;gap:6px;flex-wrap:wrap}
+  .watch-body{display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  .watch-item.open .watch-body{display:block}
+  .watch-item.open .chev{transform:rotate(90deg)}
+  .chev{transition:transform .2s;color:var(--wine);font-size:18px}
+  .images-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .image-row{display:flex;gap:8px;align-items:center}
+  .image-row img{width:40px;height:40px;object-fit:cover;border:1px solid var(--line-soft);background:#fff}
+  .image-row input{flex:1}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--wine);color:var(--cream);padding:12px 24px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:0;transition:all .3s;pointer-events:none;z-index:9999}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5}
+  .version{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line-soft);background:var(--cream);margin-bottom:8px;flex-wrap:wrap}
+  .version .vmeta{flex:1;min-width:200px}
+  .version .vtime{font-family:var(--font-display);font-size:16px;color:var(--ink)}
+  .version .vsum{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--wine);margin-top:2px}
+  .version .vctrls{display:flex;gap:6px;flex-wrap:wrap}
+  .version.current{border-color:var(--wine);background:#fff}
+  .version .badge{display:inline-block;padding:2px 8px;background:var(--wine);color:var(--cream);font-size:9px;letter-spacing:.2em;margin-left:8px}
+  .empty{font-size:12px;color:var(--ink-soft);font-style:italic;padding:14px;text-align:center;border:1px dashed var(--line-soft)}
+
+  /* Responsive */
+  @media (max-width:960px){
+    .grid{grid-template-columns:repeat(2,1fr);gap:52px 32px}
+    .contact-grid{grid-template-columns:1fr;gap:56px}
+    .modal__inner{grid-template-columns:1fr;margin:20px}
+    .detail{padding:48px 36px}
+    section{padding:110px 24px}
+    .nav{padding:18px 24px}.nav.scrolled{padding:12px 24px}
+    .bg-frame{inset:16px}
+  }
+  @media (max-width:640px){
+    .nav__links{position:fixed;top:60px;left:0;right:0;flex-direction:column;gap:0;background:var(--paper);border-bottom:1px solid var(--line-soft);padding:16px 24px;transform:translateY(-200%);transition:transform .4s var(--ease)}
+    .nav__links.open{transform:translateY(0)}
+    .nav__link{padding:16px 0;border-bottom:1px solid var(--line-soft)}
+    .nav__link:last-child{border-bottom:0}
+    .nav__toggle{display:flex;flex-direction:column;gap:5px;width:28px;padding:4px}
+    .nav__toggle span{width:100%;height:1px;background:var(--wine)}
+    .grid{grid-template-columns:1fr;gap:48px}
+    .hero__numerals{display:none}
+    .detail__name{font-size:34px}
+    .gallery{padding:28px}
+    .gallery__main{min-height:320px}
+    section{padding:88px 20px}
+    .contact-card{padding:44px 28px}
+    .arow{grid-template-columns:1fr}
+  }
+  </style>
 </head>
 <body>
 
-  <!-- NAV -->
+<!-- ============ DEFAULT DATA ============ -->
+<script>
+window.ETERNIS_DATA = {
+  contact: {
+    whatsapp: "15551234567",
+    email: "contact@eternis.com",
+    address: "Geneva, Switzerland",
+    socials: {
+      instagram: "https://instagram.com/your-handle",
+      facebook: "https://facebook.com/your-handle",
+      twitter: "https://twitter.com/your-handle"
+    }
+  },
+  watches: [
+    { id:"noir-classique", name:"Noir Classique", price:"$4,850",
+      description:"An understated dress watch in brushed steel with a deep onyx dial. Swiss automatic movement, sapphire crystal, and a hand-stitched alligator strap.",
+      images:["https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=1200&q=80","https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=1200&q=80","https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=1200&q=80"] },
+    { id:"regal-bordeaux", name:"Regal Bordeaux", price:"$6,200",
+      description:"A wine-red sunburst dial framed in rose gold. Skeletonised hands reveal a finely decorated calibre, finished with a polished link bracelet.",
+      images:["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80","https://images.unsplash.com/photo-1622434641406-a158123450f9?w=1200&q=80","https://images.unsplash.com/photo-1606293459209-d8d8c7d59a3f?w=1200&q=80"] },
+    { id:"heritage-chronograph", name:"Heritage Chronograph", price:"$8,900",
+      description:"A vintage-inspired chronograph with twin sub-dials, tachymeter bezel, and a domed sapphire crystal. Built for those who measure moments precisely.",
+      images:["https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?w=1200&q=80","https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?w=1200&q=80","https://images.unsplash.com/photo-1548171915-e79a380a2a4b?w=1200&q=80"] },
+    { id:"marine-azure", name:"Marine Azure", price:"$5,400",
+      description:"Diver's heritage refined for the city. Ceramic bezel, luminous indices, and 300m water resistance in a perfectly proportioned 41mm case.",
+      images:["https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?w=1200&q=80","https://images.unsplash.com/photo-1614703418452-1abe1e8db96c?w=1200&q=80","https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=1200&q=80"] },
+    { id:"or-imperial", name:"Or Impérial", price:"$12,500",
+      description:"Solid 18k gold case and bracelet. A guilloché dial catches the light with every gesture — a quiet declaration of refinement.",
+      images:["https://images.unsplash.com/photo-1619134778706-7015533a6150?w=1200&q=80","https://images.unsplash.com/photo-1606293459209-d8d8c7d59a3f?w=1200&q=80","https://images.unsplash.com/photo-1622434641406-a158123450f9?w=1200&q=80"] },
+    { id:"midnight-tourbillon", name:"Midnight Tourbillon", price:"$24,800",
+      description:"A flying tourbillon at 6 o'clock, hand-finished bridges, and a deep midnight blue dial. Limited to a single line of dedicated artisans.",
+      images:["https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?w=1200&q=80","https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?w=1200&q=80","https://images.unsplash.com/photo-1548171915-e79a380a2a4b?w=1200&q=80"] },
+    { id:"ivoire-elegance", name:"Ivoire Élégance", price:"$3,750",
+      description:"A slim 38mm case with an ivory lacquered dial and Roman numerals. The kind of watch that reads as quietly considered, never loud.",
+      images:["https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=1200&q=80","https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=1200&q=80","https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=1200&q=80"] },
+    { id:"voyager-gmt", name:"Voyager GMT", price:"$7,300",
+      description:"Dual time zones in a travel-ready 40mm case. A 24-hour bezel in burgundy and black accompanies the seasoned traveller.",
+      images:["https://images.unsplash.com/photo-1614703418452-1abe1e8db96c?w=1200&q=80","https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?w=1200&q=80","https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=1200&q=80"] }
+  ]
+};
+</script>
+
+<!-- ============ PUBLIC SITE ============ -->
+<div id="public-site">
   <header class="nav" id="nav">
     <a href="#home" class="nav__brand">ETERNIS</a>
     <nav class="nav__links" id="nav-links">
@@ -20,53 +298,38 @@
       <a class="nav__link" href="#collection">Collection</a>
       <a class="nav__link" href="#contact">Contact</a>
     </nav>
-    <button class="nav__toggle" id="nav-toggle" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="nav__toggle" id="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
   </header>
 
-  <!-- HOME -->
   <section id="home">
-    <div class="bg-decor"></div>
-    <div class="bg-pattern"></div>
-    <div class="bg-frame"></div>
+    <div class="bg-decor"></div><div class="bg-pattern"></div><div class="bg-frame"></div>
     <span class="hero__numerals left">XII</span>
     <span class="hero__numerals right">VI</span>
-
     <div class="hero">
       <div class="hero__mark"><span></span>Maison Horlogère · Est. MMXX<span></span></div>
       <h1 class="hero__title">ETERNIS</h1>
       <div class="hero__rule"></div>
       <p class="hero__tagline">A quiet pursuit of mechanical excellence.</p>
-      <a class="hero__cta" href="#collection">
-        <span>Discover the collection</span>
+      <a class="hero__cta" href="#collection"><span>Discover the collection</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
       </a>
     </div>
   </section>
 
-  <!-- COLLECTION -->
   <section id="collection">
-    <div class="bg-decor"></div>
-    <div class="bg-pattern"></div>
-
+    <div class="bg-decor"></div><div class="bg-pattern"></div>
     <div class="wrap">
       <div class="section-head reveal">
         <div class="eyebrow">The Collection</div>
         <h2 class="section-title">Timepieces of <em>distinction</em></h2>
         <p class="section-sub">Each piece is composed with restraint and finished by hand — a study in proportion, light, and quiet authority.</p>
       </div>
-
-      <div class="grid" id="watch-grid"><!-- cards injected by app.js --></div>
+      <div class="grid" id="watch-grid"></div>
     </div>
   </section>
 
-  <!-- CONTACT -->
   <section id="contact">
-    <div class="bg-decor"></div>
-    <div class="bg-pattern"></div>
-    <div class="bg-frame"></div>
-
+    <div class="bg-decor"></div><div class="bg-pattern"></div><div class="bg-frame"></div>
     <div class="wrap">
       <div class="contact-grid">
         <div class="contact-info reveal">
@@ -79,7 +342,6 @@
             <li><span class="label">Atelier</span><span class="val" id="contact-location"></span></li>
           </ul>
         </div>
-
         <div class="contact-card reveal">
           <h3>Speak with us</h3>
           <p>Direct, personal, and confidential — message our atelier on WhatsApp.</p>
@@ -99,39 +361,584 @@
     <div class="meta">
       <span>© <span id="year"></span> ETERNIS</span>
       <span>·</span>
-      <a href="./admin.html">Admin / Content Manager</a>
+      <a href="#admin">Admin / Content Manager</a>
     </div>
   </footer>
 
-  <!-- WATCH DETAIL MODAL -->
   <div class="modal" id="modal" role="dialog" aria-modal="true">
     <div class="modal__inner">
       <button class="modal__close" id="modal-close" aria-label="Close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg>
       </button>
-
       <div class="gallery">
-        <div class="gallery__main" id="gallery-main">
-          <img src="" alt="" />
-        </div>
+        <div class="gallery__main" id="gallery-main"><img src="" alt=""/></div>
         <div class="gallery__thumbs" id="gallery-thumbs"></div>
       </div>
-
       <div class="detail">
         <div class="detail__eyebrow">ETERNIS Collection</div>
         <h2 class="detail__name" id="detail-name"></h2>
         <div class="detail__price" id="detail-price"></div>
         <p class="detail__desc" id="detail-desc"></p>
         <a id="detail-wa" class="wa-btn" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24z"/></svg>
           Enquire on WhatsApp
         </a>
         <div class="detail__hint">Click the main image to zoom · move cursor to pan</div>
       </div>
     </div>
   </div>
+</div>
 
-  <script src="./data.js"></script>
-  <script src="./app.js"></script>
+<!-- ============ ADMIN PANEL ============ -->
+<div id="admin-site" style="display:none">
+  <header class="admin-header">
+    <h1>ETERNIS · ADMIN</h1>
+    <div class="actions">
+      <button class="abtn ghost" id="a-view-live">View Live Site</button>
+      <button class="abtn ghost" id="a-preview">Preview Draft</button>
+      <button class="abtn ghost" id="a-export">Export JSON</button>
+      <button class="abtn ghost" id="a-reset">Discard Draft</button>
+      <button class="abtn ghost" id="a-save">Save Draft</button>
+      <button class="abtn" id="a-publish">Publish Live</button>
+    </div>
+  </header>
+  <div class="admin-container">
+    <div class="acard">
+      <h2>Contact Details</h2>
+      <div class="arow">
+        <div><label class="alabel">WhatsApp Number (digits only, intl)</label><input class="ainput" id="f-whatsapp" placeholder="15551234567"/></div>
+        <div><label class="alabel">Email</label><input class="ainput" id="f-email"/></div>
+      </div>
+      <label class="alabel">Atelier / Address</label><input class="ainput" id="f-address"/>
+      <div class="arow" style="margin-top:6px">
+        <div><label class="alabel">Instagram URL</label><input class="ainput" id="f-instagram"/></div>
+        <div><label class="alabel">Facebook URL</label><input class="ainput" id="f-facebook"/></div>
+      </div>
+      <label class="alabel">Twitter / X URL</label><input class="ainput" id="f-twitter"/>
+    </div>
+
+    <div class="acard">
+      <h2 style="display:flex;justify-content:space-between;align-items:center">Watches
+        <button class="abtn sm outline" id="a-add-watch">+ Add Watch</button>
+      </h2>
+      <div id="a-watches"></div>
+      <p class="hint" style="margin-top:18px">Use ↑ ↓ to reorder. Click a watch to expand and edit. Don't forget to <strong>Save Draft</strong>.</p>
+    </div>
+
+    <div class="acard">
+      <h2>Draft & Publish</h2>
+      <p class="hint" id="a-status-line" style="margin-bottom:10px"></p>
+      <p class="hint">Edits are kept as a <strong>Draft</strong> in this browser. Customers see the last <strong>Published</strong> version. Use <strong>Preview Draft</strong> to review, then <strong>Publish Live</strong> to make changes visible.</p>
+    </div>
+
+    <div class="acard">
+      <h2 style="display:flex;justify-content:space-between;align-items:center">Version History
+        <span style="font-size:11px;letter-spacing:.2em;color:var(--ink-soft);text-transform:uppercase">Last 20 publishes</span>
+      </h2>
+      <div id="a-history-list"></div>
+      <p class="hint" style="margin-top:14px">Each <strong>Publish Live</strong> archives the previous version. Preview, restore as draft, or republish from history.</p>
+    </div>
+  </div>
+  <div class="toast" id="a-toast">Saved</div>
+</div>
+
+<script>
+/* ============================================================
+   ETERNIS — All-in-one app (public site + admin + draft/publish)
+   ============================================================ */
+(function(){
+  const DRAFT="eternis_data_draft", PUBLISHED="eternis_data_published",
+        HISTORY="eternis_data_history", HISTORY_MAX=20, LEGACY="eternis_data";
+
+  // Legacy migration
+  try{
+    const legacy = localStorage.getItem(LEGACY);
+    if(legacy && !localStorage.getItem(PUBLISHED)) localStorage.setItem(PUBLISHED, legacy);
+    if(legacy) localStorage.removeItem(LEGACY);
+  }catch(e){}
+
+  function getPublished(){
+    try{ const p=localStorage.getItem(PUBLISHED); if(p) return JSON.parse(p); }catch(e){}
+    return JSON.parse(JSON.stringify(window.ETERNIS_DATA));
+  }
+  function getDraft(){
+    try{ const d=localStorage.getItem(DRAFT); if(d) return JSON.parse(d); }catch(e){}
+    return getPublished();
+  }
+
+  /* ---------- Router: # vs #admin ---------- */
+  function isAdmin(){ return location.hash.replace(/^#/,"").split("?")[0] === "admin"; }
+  function previewMode(){
+    const h = location.hash;
+    if(h.indexOf("preview=draft")>-1) return "draft";
+    if(h.indexOf("preview=version")>-1) return "version";
+    const q = new URLSearchParams(location.search);
+    return q.get("preview");
+  }
+
+  function route(){
+    const admin = isAdmin();
+    document.getElementById("public-site").style.display = admin ? "none" : "";
+    document.getElementById("admin-site").style.display = admin ? "" : "none";
+    document.title = admin ? "ETERNIS — Admin" : "ETERNIS — Fine Timepieces";
+    document.body.classList.toggle("admin-body", admin);
+    if(admin) initAdmin(); else renderPublic();
+  }
+  window.addEventListener("hashchange", route);
+
+  /* ============================================================
+     PUBLIC SITE
+     ============================================================ */
+  let publicRendered = false;
+  function renderPublic(){
+    const mode = previewMode();
+    let data = getPublished();
+    let banner = "";
+    if(mode === "draft"){ data = getDraft(); banner = "DRAFT PREVIEW · NOT VISIBLE TO CUSTOMERS"; }
+    else if(mode === "version"){
+      try{ const v = sessionStorage.getItem("eternis_data_version_preview"); if(v){ data = JSON.parse(v); banner="ARCHIVED VERSION PREVIEW · NOT VISIBLE TO CUSTOMERS"; } }catch(e){}
+    }
+
+    // Banner
+    document.querySelectorAll(".preview-banner").forEach(b=>b.remove());
+    if(banner){
+      const b = document.createElement("div");
+      b.className="preview-banner"; b.textContent=banner;
+      document.body.appendChild(b);
+    }
+
+    // Grid
+    const grid = document.getElementById("watch-grid");
+    grid.innerHTML = "";
+    data.watches.forEach((w,i)=>{
+      const card = document.createElement("article");
+      card.className="card reveal";
+      card.style.transitionDelay = (i%3)*80 + "ms";
+      card.innerHTML = `
+        <div class="card__media">
+          <img src="${w.images[0]||''}" alt="${escapeHtml(w.name)}" loading="lazy"/>
+          <span class="card__view">View Piece</span>
+        </div>
+        <div class="card__divider"></div>
+        <h3 class="card__name">${escapeHtml(w.name)}</h3>
+        <div class="card__price">${escapeHtml(w.price)}</div>`;
+      card.addEventListener("click", ()=>openWatch(data, w.id));
+      grid.appendChild(card);
+    });
+
+    // Contact
+    const c = data.contact;
+    const waLink = (msg)=>`https://web.whatsapp.com/send?phone=${encodeURIComponent(c.whatsapp)}&text=${encodeURIComponent(msg)}`;
+    document.getElementById("wa-main").href = waLink("Hello ETERNIS, I would like to inquire about your collection.");
+    document.getElementById("contact-email").textContent = c.email;
+    document.getElementById("contact-location").textContent = c.address;
+    document.getElementById("contact-whatsapp").textContent = "+" + (c.whatsapp||"").replace(/(\d{1,3})(\d{3})(\d{3})(\d+)/,"$1 $2 $3 $4");
+
+    const socials = document.getElementById("socials");
+    socials.innerHTML = "";
+    const icons = {
+      instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>',
+      facebook:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 22v-9h3l.5-4H13V6.5c0-1.2.3-2 2-2h2V1.1C16.7 1 15.5 1 14.3 1 11.7 1 10 2.6 10 5.5V9H7v4h3v9h3z"/></svg>',
+      twitter:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231z"/></svg>'
+    };
+    Object.entries(c.socials||{}).forEach(([k,url])=>{
+      if(!url) return;
+      const a = document.createElement("a");
+      a.href=url; a.target="_blank"; a.rel="noopener"; a.setAttribute("aria-label",k);
+      a.innerHTML = icons[k]||"";
+      socials.appendChild(a);
+    });
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Stash for modal
+    window.__ETERNIS_VIEW = { data, waLink };
+
+    // Reveals
+    document.querySelectorAll(".reveal").forEach(el=>el.classList.remove("in"));
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} });
+    },{threshold:.12});
+    document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+
+    if(!publicRendered) bindPublicChrome();
+    publicRendered = true;
+  }
+
+  function openWatch(data, id){
+    const w = data.watches.find(x=>x.id===id);
+    if(!w) return;
+    const { waLink } = window.__ETERNIS_VIEW;
+    const galleryMain = document.getElementById("gallery-main");
+    const galleryMainImg = galleryMain.querySelector("img");
+    const galleryThumbs = document.getElementById("gallery-thumbs");
+    document.getElementById("detail-name").textContent = w.name;
+    document.getElementById("detail-price").textContent = w.price;
+    document.getElementById("detail-desc").textContent = w.description;
+    document.getElementById("detail-wa").href = waLink(`Hello ETERNIS, I'm interested in the ${w.name} (${w.price}). Could you share more details?`);
+    galleryMainImg.src = w.images[0]||""; galleryMainImg.alt = w.name;
+    galleryThumbs.innerHTML = "";
+    w.images.forEach((src,idx)=>{
+      const b = document.createElement("button");
+      if(idx===0) b.classList.add("active");
+      b.innerHTML = `<img src="${src}" alt="${escapeHtml(w.name)} ${idx+1}" loading="lazy"/>`;
+      b.addEventListener("click",()=>{
+        galleryMainImg.src = src;
+        galleryMain.classList.remove("zoomed");
+        galleryThumbs.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+      });
+      galleryThumbs.appendChild(b);
+    });
+    document.getElementById("modal").classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function bindPublicChrome(){
+    const modal = document.getElementById("modal");
+    const galleryMain = document.getElementById("gallery-main");
+    const galleryMainImg = galleryMain.querySelector("img");
+    const close = ()=>{ modal.classList.remove("open"); galleryMain.classList.remove("zoomed"); document.body.style.overflow=""; };
+    document.getElementById("modal-close").addEventListener("click", close);
+    modal.addEventListener("click",(e)=>{ if(e.target===modal) close(); });
+    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") close(); });
+    galleryMain.addEventListener("click",()=>{ galleryMain.classList.toggle("zoomed"); galleryMainImg.style.transformOrigin="center center"; });
+    galleryMain.addEventListener("mousemove",(e)=>{
+      if(!galleryMain.classList.contains("zoomed")) return;
+      const r = galleryMain.getBoundingClientRect();
+      const x = ((e.clientX-r.left)/r.width)*100;
+      const y = ((e.clientY-r.top)/r.height)*100;
+      galleryMainImg.style.transformOrigin = `${x}% ${y}%`;
+    });
+
+    // Reliable link opening (iframe-safe)
+    document.addEventListener("click",(e)=>{
+      const a = e.target.closest && e.target.closest('a[target="_blank"], a.wa-btn');
+      if(!a || !a.href) return;
+      if(a.getAttribute("href").startsWith("#")) return;
+      e.preventDefault();
+      window.open(a.href, "_blank", "noopener,noreferrer");
+    });
+
+    const nav = document.getElementById("nav");
+    const navLinks = document.getElementById("nav-links");
+    const navToggle = document.getElementById("nav-toggle");
+    window.addEventListener("scroll",()=>nav.classList.toggle("scrolled", window.scrollY>30));
+    navToggle.addEventListener("click",()=>navLinks.classList.toggle("open"));
+    navLinks.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>navLinks.classList.remove("open")));
+  }
+
+  /* ============================================================
+     ADMIN
+     ============================================================ */
+  let state = null;
+  let lastSavedSnapshot = "";
+  let adminInit = false;
+
+  function initAdmin(){
+    state = getDraft();
+    lastSavedSnapshot = JSON.stringify(state);
+    bindContact();
+    renderWatches();
+    renderHistory();
+    updateStatus();
+    if(adminInit) return;
+    adminInit = true;
+    bindAdminActions();
+    document.addEventListener("input", updateStatus);
+  }
+
+  function toast(msg){
+    const t = document.getElementById("a-toast");
+    t.textContent = msg; t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 1800);
+  }
+
+  function bindContact(){
+    f_whatsapp.value = state.contact.whatsapp||"";
+    f_email.value = state.contact.email||"";
+    f_address.value = state.contact.address||"";
+    f_instagram.value = state.contact.socials.instagram||"";
+    f_facebook.value = state.contact.socials.facebook||"";
+    f_twitter.value = state.contact.socials.twitter||"";
+  }
+  function readContact(){
+    state.contact.whatsapp = f_whatsapp.value.replace(/\D/g,"");
+    state.contact.email = f_email.value.trim();
+    state.contact.address = f_address.value.trim();
+    state.contact.socials.instagram = f_instagram.value.trim();
+    state.contact.socials.facebook = f_facebook.value.trim();
+    state.contact.socials.twitter = f_twitter.value.trim();
+  }
+
+  const list = ()=>document.getElementById("a-watches");
+
+  function renderWatches(){
+    const L = list(); L.innerHTML = "";
+    state.watches.forEach((w,idx)=>{
+      const el = document.createElement("div");
+      el.className = "watch-item"; el.dataset.idx = idx;
+      el.innerHTML = `
+        <div class="watch-head">
+          <img class="watch-thumb" src="${w.images[0]||''}" alt=""/>
+          <div class="wmeta">
+            <strong>${escapeHtml(w.name||'Untitled')}</strong>
+            <span>${escapeHtml(w.price||'')}</span>
+          </div>
+          <div class="ctrls">
+            <button class="abtn sm outline" data-act="up" title="Move up">↑</button>
+            <button class="abtn sm outline" data-act="down" title="Move down">↓</button>
+            <button class="abtn sm danger" data-act="del">Remove</button>
+            <span class="chev">›</span>
+          </div>
+        </div>
+        <div class="watch-body">
+          <div class="arow">
+            <div><label class="alabel">Name</label><input class="ainput" data-f="name" value="${escapeAttr(w.name)}"/></div>
+            <div><label class="alabel">Price</label><input class="ainput" data-f="price" value="${escapeAttr(w.price)}"/></div>
+          </div>
+          <label class="alabel">ID (letters, numbers, dashes)</label>
+          <input class="ainput" data-f="id" value="${escapeAttr(w.id)}"/>
+          <label class="alabel">Description</label>
+          <textarea class="atextarea" data-f="description">${escapeHtml(w.description)}</textarea>
+          <label class="alabel">Images (first is cover · upload files or paste URLs)</label>
+          <div class="images-list" data-images></div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="abtn sm outline" data-act="add-img" type="button">+ Add image URL</button>
+            <label class="abtn sm outline" style="cursor:pointer;margin:0">
+              + Upload from device
+              <input type="file" accept="image/*" multiple data-act="upload-img" style="display:none"/>
+            </label>
+          </div>
+        </div>`;
+      const imgs = el.querySelector("[data-images]");
+      w.images.forEach((src)=>imgs.appendChild(imageRow(src)));
+
+      el.querySelector(".watch-head").addEventListener("click",(e)=>{
+        if(e.target.closest("button")) return;
+        el.classList.toggle("open");
+      });
+      el.querySelectorAll(".ctrls [data-act]").forEach(btn=>{
+        btn.addEventListener("click",(e)=>{
+          e.stopPropagation();
+          const act = btn.dataset.act;
+          if(act==="up" && idx>0) swap(idx, idx-1);
+          if(act==="down" && idx<state.watches.length-1) swap(idx, idx+1);
+          if(act==="del" && confirm("Remove "+(w.name||"this watch")+"?")){
+            state.watches.splice(idx,1); renderWatches();
+          }
+        });
+      });
+      el.querySelectorAll("[data-f]").forEach(inp=>{
+        inp.addEventListener("input",()=>{
+          state.watches[idx][inp.dataset.f] = inp.value;
+          if(inp.dataset.f==="name") el.querySelector(".wmeta strong").textContent = inp.value||"Untitled";
+          if(inp.dataset.f==="price") el.querySelector(".wmeta span").textContent = inp.value||"";
+        });
+      });
+      el.querySelector('[data-act="add-img"]').addEventListener("click",()=>{
+        state.watches[idx].images.push("");
+        imgs.appendChild(imageRow(""));
+      });
+      el.querySelector('[data-act="upload-img"]').addEventListener("change",(e)=>{
+        const files = [...e.target.files]; let done = 0;
+        files.forEach(file=>{
+          const reader = new FileReader();
+          reader.onload = ()=>{
+            const dataUrl = reader.result;
+            state.watches[idx].images.push(dataUrl);
+            imgs.appendChild(imageRow(dataUrl));
+            el.querySelector(".watch-thumb").src = state.watches[idx].images[0]||"";
+            if(++done===files.length){ e.target.value=""; toast(files.length+" image(s) added · Save"); }
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      L.appendChild(el);
+    });
+  }
+
+  function imageRow(src){
+    const row = document.createElement("div");
+    row.className = "image-row";
+    row.innerHTML = `
+      <img src="${src||''}" onerror="this.style.opacity=.2"/>
+      <input class="ainput" type="url" placeholder="https://..." value="${escapeAttr(src)}"/>
+      <button class="abtn sm danger" type="button">×</button>`;
+    const input = row.querySelector("input");
+    const img = row.querySelector("img");
+    input.addEventListener("input",()=>{
+      const watchEl = row.closest(".watch-item");
+      const idx = +watchEl.dataset.idx;
+      const imgs = [...watchEl.querySelectorAll(".image-row input")].map(x=>x.value);
+      state.watches[idx].images = imgs;
+      img.src = input.value; img.style.opacity = 1;
+      const myIdx = [...row.parentElement.children].indexOf(row);
+      if(myIdx===0) watchEl.querySelector(".watch-thumb").src = input.value;
+    });
+    row.querySelector("button").addEventListener("click",()=>{
+      const watchEl = row.closest(".watch-item");
+      const idx = +watchEl.dataset.idx;
+      row.remove();
+      const imgs = [...watchEl.querySelectorAll(".image-row input")].map(x=>x.value);
+      state.watches[idx].images = imgs;
+      watchEl.querySelector(".watch-thumb").src = imgs[0]||"";
+    });
+    return row;
+  }
+
+  function swap(a,b){ const t=state.watches[a]; state.watches[a]=state.watches[b]; state.watches[b]=t; renderWatches(); }
+
+  function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  function updateStatus(){
+    const el = document.getElementById("a-status-line");
+    if(!el || !state) return;
+    const hasDraft = !!localStorage.getItem(DRAFT);
+    const hasPub = !!localStorage.getItem(PUBLISHED);
+    readContact();
+    const dirty = JSON.stringify(state) !== lastSavedSnapshot;
+    let bits = [];
+    bits.push(hasPub ? "● Live version published" : "● No version published yet (showing defaults)");
+    if(hasDraft) bits.push("● Draft saved — not yet live");
+    if(dirty) bits.push("● Unsaved changes");
+    el.innerHTML = bits.map(b=>`<span style="display:inline-block;margin-right:18px">${b}</span>`).join("");
+  }
+
+  /* History */
+  function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HISTORY)||"[]"); }catch(e){ return []; } }
+  function saveHistory(arr){ localStorage.setItem(HISTORY, JSON.stringify(arr.slice(0, HISTORY_MAX))); }
+  function pushHistory(label, payload){
+    if(!payload) return;
+    const arr = loadHistory();
+    if(arr[0] && arr[0].data === payload) return;
+    arr.unshift({ id:"v"+Date.now(), at:Date.now(), label, data:payload });
+    saveHistory(arr);
+  }
+  function summarize(payload){
+    try{
+      const d = JSON.parse(payload);
+      const n = (d.watches||[]).length;
+      return n+" watch"+(n===1?"":"es")+" · "+(d.contact && d.contact.whatsapp ? "WA "+d.contact.whatsapp : "no WhatsApp");
+    }catch(e){ return ""; }
+  }
+  function fmtTime(ts){ return new Date(ts).toLocaleString(undefined,{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
+
+  function renderHistory(){
+    const HL = document.getElementById("a-history-list");
+    const arr = loadHistory();
+    const currentPub = localStorage.getItem(PUBLISHED);
+    HL.innerHTML = "";
+    if(currentPub){ HL.appendChild(versionRow({id:"current",at:null,label:"Current",data:currentPub,isCurrent:true})); }
+    if(arr.length===0 && !currentPub){
+      const e = document.createElement("div"); e.className="empty";
+      e.textContent="No published versions yet. Click Publish Live to create the first one.";
+      HL.appendChild(e); return;
+    }
+    arr.forEach(v=>HL.appendChild(versionRow(v)));
+  }
+  function versionRow(v){
+    const row = document.createElement("div");
+    row.className = "version"+(v.isCurrent?" current":"");
+    const time = v.isCurrent ? "Live now" : fmtTime(v.at);
+    row.innerHTML = `
+      <div class="vmeta">
+        <div class="vtime">${escapeHtml(time)}${v.isCurrent?'<span class="badge">LIVE</span>':''}</div>
+        <div class="vsum">${escapeHtml(summarize(v.data))}</div>
+      </div>
+      <div class="vctrls">
+        <button class="abtn sm outline" data-act="preview">Preview</button>
+        ${v.isCurrent?'':'<button class="abtn sm outline" data-act="restore">Load as Draft</button>'}
+        ${v.isCurrent?'':'<button class="abtn sm" data-act="republish">Republish</button>'}
+        ${v.isCurrent?'':'<button class="abtn sm danger" data-act="delete">×</button>'}
+      </div>`;
+    row.querySelector('[data-act="preview"]').addEventListener("click",()=>{
+      sessionStorage.setItem("eternis_data_version_preview", v.data);
+      window.open(location.pathname+"#preview=version","_blank","noopener,noreferrer");
+    });
+    const rb = row.querySelector('[data-act="restore"]');
+    if(rb) rb.addEventListener("click",()=>{
+      if(!confirm("Load this version as your draft? Unsaved changes are replaced.")) return;
+      localStorage.setItem(DRAFT, v.data);
+      state = JSON.parse(v.data); lastSavedSnapshot = v.data;
+      bindContact(); renderWatches(); updateStatus();
+      toast("Loaded as draft");
+    });
+    const rep = row.querySelector('[data-act="republish"]');
+    if(rep) rep.addEventListener("click",()=>{
+      if(!confirm("Republish this version live? Current live is archived.")) return;
+      const prev = localStorage.getItem(PUBLISHED);
+      if(prev && prev !== v.data) pushHistory("Published", prev);
+      localStorage.setItem(PUBLISHED, v.data);
+      localStorage.setItem(DRAFT, v.data);
+      state = JSON.parse(v.data); lastSavedSnapshot = v.data;
+      bindContact(); renderWatches(); renderHistory(); updateStatus();
+      toast("Republished live");
+    });
+    const del = row.querySelector('[data-act="delete"]');
+    if(del) del.addEventListener("click",()=>{
+      if(!confirm("Delete this archived version?")) return;
+      saveHistory(loadHistory().filter(x=>x.id!==v.id));
+      renderHistory(); toast("Deleted");
+    });
+    return row;
+  }
+
+  function bindAdminActions(){
+    document.getElementById("a-add-watch").addEventListener("click",()=>{
+      state.watches.push({ id:"watch-"+Date.now(), name:"New Watch", price:"$0", description:"", images:[""] });
+      renderWatches();
+      const last = list().lastElementChild;
+      if(last){ last.classList.add("open"); last.scrollIntoView({behavior:"smooth",block:"center"}); }
+    });
+    document.getElementById("a-save").addEventListener("click",()=>{
+      readContact();
+      localStorage.setItem(DRAFT, JSON.stringify(state));
+      lastSavedSnapshot = JSON.stringify(state);
+      updateStatus(); toast("Draft saved");
+    });
+    document.getElementById("a-publish").addEventListener("click",()=>{
+      readContact();
+      if(!confirm("Publish these changes live? Customers will see them immediately.")) return;
+      const payload = JSON.stringify(state);
+      const prev = localStorage.getItem(PUBLISHED);
+      if(prev && prev !== payload) pushHistory("Published", prev);
+      localStorage.setItem(PUBLISHED, payload);
+      localStorage.setItem(DRAFT, payload);
+      lastSavedSnapshot = payload;
+      renderHistory(); updateStatus(); toast("Published live");
+    });
+    document.getElementById("a-reset").addEventListener("click",()=>{
+      if(!confirm("Discard the current draft and revert to the published version?")) return;
+      localStorage.removeItem(DRAFT);
+      state = getPublished(); lastSavedSnapshot = JSON.stringify(state);
+      bindContact(); renderWatches(); updateStatus(); toast("Draft discarded");
+    });
+    document.getElementById("a-preview").addEventListener("click",()=>{
+      readContact();
+      localStorage.setItem(DRAFT, JSON.stringify(state));
+      lastSavedSnapshot = JSON.stringify(state); updateStatus();
+      window.open(location.pathname+"#preview=draft","_blank","noopener,noreferrer");
+    });
+    document.getElementById("a-view-live").addEventListener("click",()=>{
+      window.open(location.pathname,"_blank","noopener,noreferrer");
+    });
+    document.getElementById("a-export").addEventListener("click",()=>{
+      readContact();
+      const content = "/* ETERNIS data — exported "+new Date().toISOString()+" */\nwindow.ETERNIS_DATA = "+JSON.stringify(state,null,2)+";\n";
+      const blob = new Blob([content], {type:"application/javascript"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href=url; a.download="eternis-data.js"; a.click();
+      URL.revokeObjectURL(url); toast("Downloaded");
+    });
+  }
+
+  // Boot
+  route();
+})();
+</script>
 </body>
 </html>
