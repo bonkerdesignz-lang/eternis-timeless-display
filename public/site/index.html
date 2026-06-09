@@ -1010,17 +1010,24 @@ window.ETERNIS_DATA = {
       lastSavedSnapshot = JSON.stringify(state);
       updateStatus(); toast("Draft saved");
     });
-    document.getElementById("a-publish").addEventListener("click",()=>{
+    document.getElementById("a-publish").addEventListener("click", async ()=>{
       readContact();
       if(!confirm("Publish these changes live? Customers will see them immediately.")) return;
       const payload = JSON.stringify(state);
       const prev = localStorage.getItem(PUBLISHED);
+      try{
+        await pushCloudPublished(state);
+      }catch(e){
+        alert("Could not publish to the cloud: " + (e.message||e) + "\nMake sure you are signed in as the admin.");
+        return;
+      }
       if(prev && prev !== payload) pushHistory("Published", prev);
       localStorage.setItem(PUBLISHED, payload);
       localStorage.setItem(DRAFT, payload);
       lastSavedSnapshot = payload;
-      renderHistory(); updateStatus(); toast("Published live");
+      renderHistory(); updateStatus(); toast("Published live to all visitors");
     });
+
     document.getElementById("a-reset").addEventListener("click",()=>{
       if(!confirm("Discard the current draft and revert to the published version?")) return;
       localStorage.removeItem(DRAFT);
