@@ -244,8 +244,44 @@
     .arow{grid-template-columns:1fr}
   }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    window.ETERNIS_SB_URL = "https://mimxerniqtvabngdyrsx.supabase.co";
+    window.ETERNIS_SB_KEY = "sb_publishable_OtqKBj2VAj0M_PptT7odNA_eHfW3pQt";
+    window.ETERNIS_SB = window.supabase.createClient(window.ETERNIS_SB_URL, window.ETERNIS_SB_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, storageKey: "eternis_admin_auth" }
+    });
+  </script>
+  <style>
+    #login-overlay{position:fixed;inset:0;background:#0b0b0c;display:none;align-items:center;justify-content:center;z-index:9999;font-family:Inter,system-ui,sans-serif;color:#eae6df}
+    #login-overlay.show{display:flex}
+    #login-overlay .box{background:#141416;border:1px solid #2a2a2d;border-radius:14px;padding:36px;width:min(380px,92vw);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+    #login-overlay h2{margin:0 0 6px;font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.04em}
+    #login-overlay p{margin:0 0 18px;color:#9a958d;font-size:13px}
+    #login-overlay input{width:100%;padding:11px 13px;background:#0b0b0c;border:1px solid #2a2a2d;border-radius:8px;color:#eae6df;margin-bottom:10px;font:inherit;font-size:14px;box-sizing:border-box}
+    #login-overlay button{width:100%;padding:12px;background:#4a0d1a;color:#fff;border:0;border-radius:8px;font:inherit;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;cursor:pointer;margin-top:6px}
+    #login-overlay button.ghost{background:transparent;border:1px solid #2a2a2d;color:#9a958d;margin-top:8px}
+    #login-overlay .err{color:#ff6b6b;font-size:12px;min-height:16px;margin-top:6px}
+    #login-overlay .tab{display:flex;gap:6px;margin-bottom:14px}
+    #login-overlay .tab span{flex:1;text-align:center;padding:7px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a958d;border-bottom:1px solid #2a2a2d;cursor:pointer}
+    #login-overlay .tab span.active{color:#eae6df;border-bottom-color:#4a0d1a}
+  </style>
 </head>
 <body>
+
+<!-- ============ ADMIN LOGIN ============ -->
+<div id="login-overlay">
+  <div class="box">
+    <h2>Admin Access</h2>
+    <p>Sign in to manage ETERNIS content.</p>
+    <div class="tab"><span class="active" data-mode="signin">Sign In</span><span data-mode="signup">Create Account</span></div>
+    <input type="email" id="lg_email" placeholder="email"/>
+    <input type="password" id="lg_pass" placeholder="password"/>
+    <div class="err" id="lg_err"></div>
+    <button id="lg_submit">Sign In</button>
+    <button class="ghost" id="lg_back">← Back to site</button>
+  </div>
+</div>
 
 <!-- ============ DEFAULT DATA ============ -->
 <script>
