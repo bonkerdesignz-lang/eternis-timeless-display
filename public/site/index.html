@@ -244,8 +244,44 @@
     .arow{grid-template-columns:1fr}
   }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    window.ETERNIS_SB_URL = "https://mimxerniqtvabngdyrsx.supabase.co";
+    window.ETERNIS_SB_KEY = "sb_publishable_OtqKBj2VAj0M_PptT7odNA_eHfW3pQt";
+    window.ETERNIS_SB = window.supabase.createClient(window.ETERNIS_SB_URL, window.ETERNIS_SB_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, storageKey: "eternis_admin_auth" }
+    });
+  </script>
+  <style>
+    #login-overlay{position:fixed;inset:0;background:#0b0b0c;display:none;align-items:center;justify-content:center;z-index:9999;font-family:Inter,system-ui,sans-serif;color:#eae6df}
+    #login-overlay.show{display:flex}
+    #login-overlay .box{background:#141416;border:1px solid #2a2a2d;border-radius:14px;padding:36px;width:min(380px,92vw);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+    #login-overlay h2{margin:0 0 6px;font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.04em}
+    #login-overlay p{margin:0 0 18px;color:#9a958d;font-size:13px}
+    #login-overlay input{width:100%;padding:11px 13px;background:#0b0b0c;border:1px solid #2a2a2d;border-radius:8px;color:#eae6df;margin-bottom:10px;font:inherit;font-size:14px;box-sizing:border-box}
+    #login-overlay button{width:100%;padding:12px;background:#4a0d1a;color:#fff;border:0;border-radius:8px;font:inherit;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;cursor:pointer;margin-top:6px}
+    #login-overlay button.ghost{background:transparent;border:1px solid #2a2a2d;color:#9a958d;margin-top:8px}
+    #login-overlay .err{color:#ff6b6b;font-size:12px;min-height:16px;margin-top:6px}
+    #login-overlay .tab{display:flex;gap:6px;margin-bottom:14px}
+    #login-overlay .tab span{flex:1;text-align:center;padding:7px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a958d;border-bottom:1px solid #2a2a2d;cursor:pointer}
+    #login-overlay .tab span.active{color:#eae6df;border-bottom-color:#4a0d1a}
+  </style>
 </head>
 <body>
+
+<!-- ============ ADMIN LOGIN ============ -->
+<div id="login-overlay">
+  <div class="box">
+    <h2>Admin Access</h2>
+    <p>Sign in to manage ETERNIS content.</p>
+    <div class="tab"><span class="active" data-mode="signin">Sign In</span><span data-mode="signup">Create Account</span></div>
+    <input type="email" id="lg_email" placeholder="email"/>
+    <input type="password" id="lg_pass" placeholder="password"/>
+    <div class="err" id="lg_err"></div>
+    <button id="lg_submit">Sign In</button>
+    <button class="ghost" id="lg_back">← Back to site</button>
+  </div>
+</div>
 
 <!-- ============ DEFAULT DATA ============ -->
 <script>
@@ -457,13 +493,38 @@ window.ETERNIS_DATA = {
     if(legacy) localStorage.removeItem(LEGACY);
   }catch(e){}
 
+  const SB = window.ETERNIS_SB;
+  const CLOUD_CACHE = "eternis_data_cloud_cache";
+
   function getPublished(){
+    try{ const c=localStorage.getItem(CLOUD_CACHE); if(c) return JSON.parse(c); }catch(e){}
     try{ const p=localStorage.getItem(PUBLISHED); if(p) return JSON.parse(p); }catch(e){}
     return JSON.parse(JSON.stringify(window.ETERNIS_DATA));
   }
   function getDraft(){
     try{ const d=localStorage.getItem(DRAFT); if(d) return JSON.parse(d); }catch(e){}
     return getPublished();
+  }
+
+  async function fetchCloudPublished(){
+    try{
+      const { data, error } = await SB.from("site_content").select("data").eq("id","main").maybeSingle();
+      if(error) { console.warn("cloud fetch", error); return null; }
+      if(data && data.data && Object.keys(data.data).length){
+        localStorage.setItem(CLOUD_CACHE, JSON.stringify(data.data));
+        return data.data;
+      }
+    }catch(e){ console.warn(e); }
+    return null;
+  }
+  async function pushCloudPublished(payloadObj){
+    const { error } = await SB.from("site_content").upsert({ id:"main", data: payloadObj, updated_at: new Date().toISOString() });
+    if(error) throw error;
+    localStorage.setItem(CLOUD_CACHE, JSON.stringify(payloadObj));
+  }
+  async function isSignedIn(){
+    const { data } = await SB.auth.getSession();
+    return !!(data && data.session);
   }
 
   /* ---------- Router: # vs #admin ---------- */
@@ -476,15 +537,65 @@ window.ETERNIS_DATA = {
     return q.get("preview");
   }
 
-  function route(){
+  async function route(){
     const admin = isAdmin();
+    // Always refresh public content from the cloud so visitors see published edits.
+    await fetchCloudPublished();
     document.getElementById("public-site").style.display = admin ? "none" : "";
     document.getElementById("admin-site").style.display = admin ? "" : "none";
     document.title = admin ? "ETERNIS — Admin" : "ETERNIS — Fine Timepieces";
     document.body.classList.toggle("admin-body", admin);
-    if(admin) initAdmin(); else renderPublic();
+    if(admin){
+      if(await isSignedIn()) { hideLogin(); initAdmin(); }
+      else { showLogin(); }
+    } else {
+      hideLogin();
+      renderPublic();
+    }
   }
   window.addEventListener("hashchange", route);
+
+  /* ---------- Login overlay ---------- */
+  function showLogin(){ document.getElementById("login-overlay").classList.add("show"); }
+  function hideLogin(){ document.getElementById("login-overlay").classList.remove("show"); }
+  (function wireLogin(){
+    let mode = "signin";
+    const overlay = document.getElementById("login-overlay");
+    if(!overlay) return;
+    overlay.querySelectorAll(".tab span").forEach(t=>{
+      t.addEventListener("click", ()=>{
+        mode = t.dataset.mode;
+        overlay.querySelectorAll(".tab span").forEach(x=>x.classList.toggle("active", x===t));
+        document.getElementById("lg_submit").textContent = mode==="signup" ? "Create Account" : "Sign In";
+        document.getElementById("lg_err").textContent = "";
+      });
+    });
+    document.getElementById("lg_back").addEventListener("click", ()=>{ location.hash = ""; });
+    document.getElementById("lg_submit").addEventListener("click", async ()=>{
+      const email = document.getElementById("lg_email").value.trim();
+      const pass = document.getElementById("lg_pass").value;
+      const err = document.getElementById("lg_err");
+      err.textContent = "";
+      if(!email || !pass){ err.textContent="Enter email and password."; return; }
+      try{
+        let res;
+        if(mode==="signup"){
+          res = await SB.auth.signUp({ email, password: pass, options: { emailRedirectTo: location.origin + location.pathname + "#admin" } });
+        } else {
+          res = await SB.auth.signInWithPassword({ email, password: pass });
+        }
+        if(res.error){ err.textContent = res.error.message; return; }
+        if(mode==="signup" && !res.data.session){
+          err.textContent = "Account created. Check your email to confirm, then sign in.";
+          return;
+        }
+        hideLogin(); initAdmin();
+      }catch(e){ err.textContent = e.message || "Failed."; }
+    });
+    document.getElementById("lg_pass").addEventListener("keydown", e=>{ if(e.key==="Enter") document.getElementById("lg_submit").click(); });
+  })();
+
+
 
   /* ============================================================
      PUBLIC SITE
@@ -899,17 +1010,24 @@ window.ETERNIS_DATA = {
       lastSavedSnapshot = JSON.stringify(state);
       updateStatus(); toast("Draft saved");
     });
-    document.getElementById("a-publish").addEventListener("click",()=>{
+    document.getElementById("a-publish").addEventListener("click", async ()=>{
       readContact();
       if(!confirm("Publish these changes live? Customers will see them immediately.")) return;
       const payload = JSON.stringify(state);
       const prev = localStorage.getItem(PUBLISHED);
+      try{
+        await pushCloudPublished(state);
+      }catch(e){
+        alert("Could not publish to the cloud: " + (e.message||e) + "\nMake sure you are signed in as the admin.");
+        return;
+      }
       if(prev && prev !== payload) pushHistory("Published", prev);
       localStorage.setItem(PUBLISHED, payload);
       localStorage.setItem(DRAFT, payload);
       lastSavedSnapshot = payload;
-      renderHistory(); updateStatus(); toast("Published live");
+      renderHistory(); updateStatus(); toast("Published live to all visitors");
     });
+
     document.getElementById("a-reset").addEventListener("click",()=>{
       if(!confirm("Discard the current draft and revert to the published version?")) return;
       localStorage.removeItem(DRAFT);
