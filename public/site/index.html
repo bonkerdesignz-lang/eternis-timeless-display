@@ -493,13 +493,38 @@ window.ETERNIS_DATA = {
     if(legacy) localStorage.removeItem(LEGACY);
   }catch(e){}
 
+  const SB = window.ETERNIS_SB;
+  const CLOUD_CACHE = "eternis_data_cloud_cache";
+
   function getPublished(){
+    try{ const c=localStorage.getItem(CLOUD_CACHE); if(c) return JSON.parse(c); }catch(e){}
     try{ const p=localStorage.getItem(PUBLISHED); if(p) return JSON.parse(p); }catch(e){}
     return JSON.parse(JSON.stringify(window.ETERNIS_DATA));
   }
   function getDraft(){
     try{ const d=localStorage.getItem(DRAFT); if(d) return JSON.parse(d); }catch(e){}
     return getPublished();
+  }
+
+  async function fetchCloudPublished(){
+    try{
+      const { data, error } = await SB.from("site_content").select("data").eq("id","main").maybeSingle();
+      if(error) { console.warn("cloud fetch", error); return null; }
+      if(data && data.data && Object.keys(data.data).length){
+        localStorage.setItem(CLOUD_CACHE, JSON.stringify(data.data));
+        return data.data;
+      }
+    }catch(e){ console.warn(e); }
+    return null;
+  }
+  async function pushCloudPublished(payloadObj){
+    const { error } = await SB.from("site_content").upsert({ id:"main", data: payloadObj, updated_at: new Date().toISOString() });
+    if(error) throw error;
+    localStorage.setItem(CLOUD_CACHE, JSON.stringify(payloadObj));
+  }
+  async function isSignedIn(){
+    const { data } = await SB.auth.getSession();
+    return !!(data && data.session);
   }
 
   /* ---------- Router: # vs #admin ---------- */
@@ -512,15 +537,65 @@ window.ETERNIS_DATA = {
     return q.get("preview");
   }
 
-  function route(){
+  async function route(){
     const admin = isAdmin();
+    // Always refresh public content from the cloud so visitors see published edits.
+    await fetchCloudPublished();
     document.getElementById("public-site").style.display = admin ? "none" : "";
     document.getElementById("admin-site").style.display = admin ? "" : "none";
     document.title = admin ? "ETERNIS — Admin" : "ETERNIS — Fine Timepieces";
     document.body.classList.toggle("admin-body", admin);
-    if(admin) initAdmin(); else renderPublic();
+    if(admin){
+      if(await isSignedIn()) { hideLogin(); initAdmin(); }
+      else { showLogin(); }
+    } else {
+      hideLogin();
+      renderPublic();
+    }
   }
   window.addEventListener("hashchange", route);
+
+  /* ---------- Login overlay ---------- */
+  function showLogin(){ document.getElementById("login-overlay").classList.add("show"); }
+  function hideLogin(){ document.getElementById("login-overlay").classList.remove("show"); }
+  (function wireLogin(){
+    let mode = "signin";
+    const overlay = document.getElementById("login-overlay");
+    if(!overlay) return;
+    overlay.querySelectorAll(".tab span").forEach(t=>{
+      t.addEventListener("click", ()=>{
+        mode = t.dataset.mode;
+        overlay.querySelectorAll(".tab span").forEach(x=>x.classList.toggle("active", x===t));
+        document.getElementById("lg_submit").textContent = mode==="signup" ? "Create Account" : "Sign In";
+        document.getElementById("lg_err").textContent = "";
+      });
+    });
+    document.getElementById("lg_back").addEventListener("click", ()=>{ location.hash = ""; });
+    document.getElementById("lg_submit").addEventListener("click", async ()=>{
+      const email = document.getElementById("lg_email").value.trim();
+      const pass = document.getElementById("lg_pass").value;
+      const err = document.getElementById("lg_err");
+      err.textContent = "";
+      if(!email || !pass){ err.textContent="Enter email and password."; return; }
+      try{
+        let res;
+        if(mode==="signup"){
+          res = await SB.auth.signUp({ email, password: pass, options: { emailRedirectTo: location.origin + location.pathname + "#admin" } });
+        } else {
+          res = await SB.auth.signInWithPassword({ email, password: pass });
+        }
+        if(res.error){ err.textContent = res.error.message; return; }
+        if(mode==="signup" && !res.data.session){
+          err.textContent = "Account created. Check your email to confirm, then sign in.";
+          return;
+        }
+        hideLogin(); initAdmin();
+      }catch(e){ err.textContent = e.message || "Failed."; }
+    });
+    document.getElementById("lg_pass").addEventListener("keydown", e=>{ if(e.key==="Enter") document.getElementById("lg_submit").click(); });
+  })();
+
+
 
   /* ============================================================
      PUBLIC SITE
